@@ -5,8 +5,8 @@ entries:
     - name: "gateway-api-install"
       version: "1.0.0"
       description: "Instalação dos CRDs padrão da Gateway API e do Envoy Gateway."
-      created: "2025-11-11T11:50:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/raw/main/labs/01-instalacao/lab.yaml"
+      created: "2025-11-21T14:50:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/raw/main/labs/gateway-api-install/lab.yaml"
       digest: "sha256:0024f7702304a78281bbf1a744816229da069c35a5c2924df3f2dd4e1030db09"
       maintainers:
         - "Aecio Pires"

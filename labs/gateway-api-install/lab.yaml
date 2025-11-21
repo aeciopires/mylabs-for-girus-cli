@@ -20,7 +20,7 @@ data:
         O Gateway API é baseada em CRDs (Custom Resource Definitions).
         steps:
         - "Os Custom Resource Definitions (CRDs) estendem a API do Kubernetes, permitindo que o NGINX Gateway funcione corretamente."
-        - "kubectl kustomize 'https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.4.0' | kubectl apply -f -"
+        - "kubectl kustomize https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.4.0 | kubectl apply -f -"
         - "kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.4.0/deploy/crds.yaml"
         - "Verifique se os CRDs foram instalados corretamente com o comando: kubectl get crds | grep gateway"
       - name: "Instalar o NGINX Gateway Controller"
