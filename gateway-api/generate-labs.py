@@ -3,66 +3,154 @@ import os
 # 1. Definição do conteúdo do index.yaml
 # Este arquivo serve como menu principal para o girus-cli
 # Segue o modelo: https://github.com/badtuxx/girus-cli?tab=readme-ov-file#indexyaml
-index_yaml = """labs:
-  - name: "01 - Instalação da Gateway API"
-    path: "./01-instalacao"
-    description: "Instalação dos CRDs padrão da Gateway API e do Envoy Gateway."
-    tags: ["setup", "install", "envoy"]
+index_yaml = """
+apiVersion: v1
+generated: "2024-03-20T10:00:00Z"
+entries:
+  lab-name:
+    - name: "01 - Instalação da Gateway API"
+      version: "1.0.0"
+      description: "Instalação dos CRDs padrão da Gateway API e do Envoy Gateway."
+      created: "2025-11-11T11:50:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/01-instalacao/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - setup
+        - install
+        - gateway api
 
-  - name: "02 - Exposição com HTTPRoute"
-    path: "./02-httproute"
-    description: "Exposição de serviços HTTP e roteamento por path."
-    tags: ["http", "routing"]
+    - name: "02 - Exposição com HTTPRoute"
+      version: "1.0.0"
+      description: "Exposição de serviços HTTP e roteamento por path."
+      created: "2025-11-11T12:00:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/02-httproute/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - http
+        - routing
 
-  - name: "03 - Exposição com TCPRoute"
-    path: "./03-tcproute"
-    description: "Exposição de serviços TCP (ex: Redis)."
-    tags: ["tcp", "redis"]
+    - name: "03 - Exposição com TCPRoute"
+      version: "1.0.0"
+      description: "Exposição de serviços TCP (ex: Redis)."
+      created: "2025-11-11T12:10:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/03-tcproute/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - tcp
+        - redis
 
-  - name: "04 - Exposição com UDPRoute"
-    path: "./04-udproute"
-    description: "Exposição de serviços UDP."
-    tags: ["udp"]
+    - name: "04 - Exposição com UDPRoute"
+      version: "1.0.0"
+      description: "Exposição de serviços UDP."
+      created: "2025-11-11T12:20:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/04-udproute/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - udp
 
-  - name: "05 - Websockets"
-    path: "./05-websocket"
-    description: "Configuração de suporte a Websockets via HTTPRoute."
-    tags: ["websocket", "http"]
+    - name: "05 - Websockets"
+      version: "1.0.0"
+      description: "Configuração de suporte a Websockets via HTTPRoute."
+      created: "2025-11-11T12:30:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/05-websocket/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - websocket
+        - http
 
-  - name: "06 - TLSRoute (Passthrough)"
-    path: "./06-tlsroute"
-    description: "Roteamento TLS Passthrough usando SNI."
-    tags: ["tls", "security"]
+    - name: "06 - TLSRoute (Passthrough)"
+      version: "1.0.0"
+      description: "Roteamento TLS Passthrough usando SNI."
+      created: "2025-11-11T12:40:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/06-tlsroute/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - tls
+        - security
 
-  - name: "07 - GRPCRoute"
-    path: "./07-grpcroute"
-    description: "Roteamento nativo de gRPC."
-    tags: ["grpc"]
+    - name: "07 - GRPCRoute"
+      version: "1.0.0"
+      description: "Roteamento nativo de gRPC."
+      created: "2025-11-11T12:50:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/07-grpcroute/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - grpc
 
-  - name: "08 - GAMMA (Mesh)"
-    path: "./08-mesh-gamma"
-    description: "Gateway API para Service Mesh (Leste-Oeste)."
-    tags: ["mesh", "gamma"]
+    - name: "08 - GAMMA (Mesh)"
+      version: "1.0.0"
+      description: "Gateway API para Service Mesh (Leste-Oeste)."
+      created: "2025-11-11T13:00:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/08-mesh-gamma/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - mesh
+        - gamma
 
-  - name: "09 - Debug e Troubleshooting"
-    path: "./09-debug"
-    description: "Técnicas de debug, status conditions e logs."
-    tags: ["debug", "troubleshooting"]
+    - name: "09 - Debug e Troubleshooting"
+      version: "1.0.0"
+      description: "Técnicas de debug, status conditions e logs."
+      created: "2025-11-11T13:10:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/09-debug/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - debug
+        - troubleshooting
 
-  - name: "10 - Monitoramento com Datadog"
-    path: "./10-datadog"
-    description: "Integração com Datadog para métricas e logs."
-    tags: ["datadog", "observability"]
+    - name: "10 - Monitoramento com Datadog"
+      version: "1.0.0"
+      description: "Integração com Datadog para métricas e logs."
+      created: "2025-11-11T13:20:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/10-datadog/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - datadog
+        - monitoring
 
-  - name: "11 - Monitoramento LGTM (Grafana)"
-    path: "./11-grafana-stack"
-    description: "Stack Prometheus, Grafana, Loki e Tempo."
-    tags: ["grafana", "prometheus", "loki", "tempo"]
+    - name: "11 - Monitoramento LGTM (Grafana)"
+      version: "1.0.0"
+      description: "Integração com stack LGTM (Grafana Labs)."
+      created: "2025-11-11T13:30:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/11-grafana-stack/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - grafana
+        - loki
+        - tempo
+        - prometheus
 
-  - name: "12 - Monitoramento VictoriaMetrics"
-    path: "./12-victoria-stack"
-    description: "Stack VictoriaMetrics para alta performance."
-    tags: ["victoriametrics", "observability"]
+    - name: "12 - Monitoramento VictoriaMetrics"
+      version: "1.0.0"
+      created: "2025-11-11T13:40:00Z"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/12-victoria-stack/lab.yaml"
+      digest: "sha256:hash-do-arquivo"
+      maintainers:
+        - "Aecio Pires"
+      keywords: 
+        - victoriametrics
+        - monitoring
 """
 
 # 2. Dicionário contendo todos os arquivos e seus conteúdos
