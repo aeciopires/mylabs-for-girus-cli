@@ -8,7 +8,7 @@ metadata:
 data:
   lab.yaml: |
     name: gateway-api-install
-    title: "01 - Instalação da Gateway API"
+    title: "Instalação da Gateway API"
     description: "Neste laboratório, vamos instalar os CRDs padrão da Gateway API e um Gateway Controller (NGINX Gateway Fabric)."
     duration: 50m
     timerEnabled: true
@@ -19,46 +19,46 @@ data:
         description: |
         O Gateway API é baseada em CRDs (Custom Resource Definitions).
         steps:
-        - "Os Custom Resource Definitions (CRDs) estendem a API do Kubernetes, permitindo que o NGINX Gateway funcione corretamente."
-        - "kubectl kustomize https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.4.0 | kubectl apply -f -"
-        - "kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.4.0/deploy/crds.yaml"
-        - "Verifique se os CRDs foram instalados corretamente com o comando: kubectl get crds | grep gateway"
+          - "Os Custom Resource Definitions (CRDs) estendem a API do Kubernetes, permitindo que o NGINX Gateway funcione corretamente."
+          - "kubectl kustomize https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.4.0 | kubectl apply -f -"
+          - "kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.4.0/deploy/crds.yaml"
+          - "Verifique se os CRDs foram instalados corretamente com o comando: kubectl get crds | grep gateway"
       - name: "Instalar o NGINX Gateway Controller"
         description: |
         Agora que os CRDs da Gateway API estão instalados, vamos instalar o NGINX Gateway Controller.
         steps:
-        - "O NGINX Gateway Controller é responsável por gerenciar os recursos da Gateway API e configurar o NGINX como um gateway."
-        - "kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.4.0/deploy/nodeport/deploy.yaml"
+          - "O NGINX Gateway Controller é responsável por gerenciar os recursos da Gateway API e configurar o NGINX como um gateway."
+          - "kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.4.0/deploy/nodeport/deploy.yaml"
       - name: "Verificar a instalação"
         description: |
         Após a instalação, é importante verificar se tudo está funcionando corretamente.
         steps:
-        - "Verifique os pods no namespace do NGINX Gateway para garantir que o controller está em execução."
-        - "kubectl get pods -n nginx-gateway"
-        - "Verifique os logs do NGINX Gateway Controller para garantir que não há erros."
-        - "kubectl logs -n nginx-gateway -l app=nginx-gateway-controller"
+          - "Verifique os pods no namespace do NGINX Gateway para garantir que o controller está em execução."
+          - "kubectl get pods -n nginx-gateway"
+          - "Verifique os logs do NGINX Gateway Controller para garantir que não há erros."
+          - "kubectl logs -n nginx-gateway -l app=nginx-gateway-controller"
       - name: "Criando o Gateway"
         description: |
         Agora que o NGINX Gateway Controller está instalado, vamos criar um Gateway simples.
         steps:
-        - "Crie um arquivo YAML chamado gateway.yaml com o seguinte conteúdo."
-        - |
-            ```
-            apiVersion: gateway.networking.k8s.io/v1beta1
-            kind: Gateway
-            metadata:
-              name: my-gateway
-            spec:
-              gatewayClassName: nginx
-              listeners:
-                - name: http
-                  protocol: HTTP
-                  port: 80
-            ```
-        - "Explicação:"
-        - "- gatewayClassName: Define que estamos utilizando a classe de gateway do NGINX."
-        - "- Listeners: Configura um listener na porta 80 para tráfego HTTP."
-        - "Aplique a configuração para criar o Gateway."
-        - "kubectl apply -f gateway.yaml"
-        - "Verifique se o Gateway foi criado corretamente."
-        - "kubectl get gateways"
+          - "Crie um arquivo YAML chamado gateway.yaml com o seguinte conteúdo."
+          - |
+              ```
+              apiVersion: gateway.networking.k8s.io/v1beta1
+              kind: Gateway
+              metadata:
+                name: my-gateway
+              spec:
+                gatewayClassName: nginx
+                listeners:
+                  - name: http
+                    protocol: HTTP
+                    port: 80
+              ```
+          - "Explicação:"
+          - "- gatewayClassName: Define que estamos utilizando a classe de gateway do NGINX."
+          - "- Listeners: Configura um listener na porta 80 para tráfego HTTP."
+          - "Aplique a configuração para criar o Gateway."
+          - "kubectl apply -f gateway.yaml"
+          - "Verifique se o Gateway foi criado corretamente."
+          - "kubectl get gateways"
