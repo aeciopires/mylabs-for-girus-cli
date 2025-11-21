@@ -7,7 +7,7 @@ entries:
       description: "Neste laboratório, vamos instalar os CRDs padrão da Gateway API e um Gateway Controller (Nginx Gateway Fabric)."
       created: "2025-11-21T14:50:00Z"
       url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/main/labs/gateway-api-install/lab.yaml"
-      digest: "sha256:29ccba407e67016746368f1db8eb0729ea3ec6d59025e248ed72b350689ad30b"
+      digest: "sha256:e842f1398363904d040845875573b053e7239325f77c88a4e495713bb482ad91"
       maintainers:
         - "Aecio Pires"
       keywords: 
