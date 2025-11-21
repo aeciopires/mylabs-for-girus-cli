@@ -75,5 +75,140 @@ data:
           - "kubectl apply -f gateway.yaml"
           - "Verifique se o Gateway foi criado corretamente."
           - "kubectl get gateways"
+          - "kubectl describe gateway nginx-gateway"
           - "Se na coluna PROGRAMED estiver como True, a configuração funcionou."
-          - "Isso irá configurar o Nginx Gateway a nível de cluster, mas é possível criar gateways adicionais por namespace conforme necessário."
+          - "Isso irá configurar o Nginx Gateway a nível de namespace e é possível criar outros gateways adicionais por namespace conforme necessário."
+          - "Liste os serviços no namespace nginx-gateway para encontrar o IP e a porta do gateway."
+          - "kubectl get svc -A"
+          - "Anote o IP do nó (NODE-IP) do serviço nginx-gateway-nginx."
+          - "Teste o gateway acessando o IP e a porta anotados no navegador ou usando curl."
+          - "curl http://NODE-IP:80"
+          - "Você deve ver uma resposta padrão do Nginx (404 Not Found), indicando que o gateway está funcionando corretamente, mas não encontrou uma rota configurada."
+      - name: "Configurando um HTTPRoute"
+        description: "Agora que o Nginx Gateway está criado, vamos configurar um HTTPRoute simples para duas aplicações."
+        steps:
+          - "Crie um arquivo YAML chamado deploy-apps.yaml com o seguinte conteúdo referente a duas aplicações."
+          - |
+            ```
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: app1
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: app1
+              template:
+                metadata:
+                  labels:
+                    app: app1
+                spec:
+                  containers:
+                    - name: app1
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=This is the APP1"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: app1-service
+            spec:
+              selector:
+                app: app1
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: app2
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: app2
+              template:
+                metadata:
+                  labels:
+                    app: app2
+                spec:
+                  containers:
+                    - name: app2
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=This is the APP2"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: app2-service
+            spec:
+              selector:
+                app: app2
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ```
+          - "Explicação:"
+          - "- Cria dois Deployments (app1 e app2) com 2 réplicas cada."
+          - "- Cada aplicação utiliza a imagem hashicorp/http-echo que retorna uma mensagem HTTP simples."
+          - "- Cria dois Services (app1-service e app2-service) para expor as aplicações."
+          - "Aplique a configuração para criar os Deployments e Services."
+          - "kubectl apply -f deploy-apps.yaml"
+          - "Verifique se os pods e serviços foram criados corretamente."
+          - "kubectl get pods,svc"
+          - "Agora, crie um arquivo YAML chamado httproute.yaml com o seguinte conteúdo para definir as rotas HTTP."
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1beta1
+            kind: HTTPRoute
+            metadata:
+              name: app1-app2-route
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/app1"
+                  backendRefs:
+                    - name: app1-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/app2"
+                  backendRefs:
+                    - name: app2-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- parentRefs: Refere-se ao Gateway que criamos anteriormente (nginx-gateway)."
+          - "- rules: Define duas regras de roteamento."
+          - "- A primeira regra roteia o tráfego com o prefixo /app1 para o serviço app1-service."
+          - "- A segunda regra roteia o tráfego com o prefixo /app2 para o serviço app2-service."
+          - "Aplique a configuração para criar o HTTPRoute."
+          - "kubectl apply -f httproute.yaml"
+          - "Verifique se o HTTPRoute foi criado corretamente."
+          - "kubectl get httproutes"
+          - "kubectl describe httproute app1-app2-route"
+          - "Teste as rotas configuradas acessando os caminhos /app1 e /app2 no gateway."
+          - "curl http://NODE-IP:80/app1"
+          - "Você deve ver a resposta: This is the APP1"
+          - "curl http://NODE-IP:80/app2"
+          - "Você deve ver a resposta: This is the APP2"
+          - "Parabéns! Você configurou com sucesso a Gateway API com o Nginx Gateway Fabric e criou rotas HTTP para duas aplicações diferentes."
+          - "Mais informações sobre o gateway API e o Nginx Gateway Fabric podem ser encontradas na documentação oficial:"
+          - "- https://gateway-api.sigs.k8s.io/"
+          - "- https://docs.nginx.com/nginx-gateway-fabric/"
+          - "Você pode expandir essa configuração adicionando mais rotas, serviços e personalizando o comportamento do gateway conforme necessário."
