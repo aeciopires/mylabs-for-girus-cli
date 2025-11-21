@@ -6,7 +6,7 @@ entries:
       version: "1.0.0"
       description: "Instalação dos CRDs padrão da Gateway API e do Envoy Gateway."
       created: "2025-11-11T11:50:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/01-instalacao/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/01-instalacao/lab.yaml"
       digest: "sha256:897f48ce67103bb1a0a9359fbc12979e51be04c9cd1a86283f62e3b3b1173e1c"
       maintainers:
         - "Aecio Pires"
@@ -19,7 +19,7 @@ entries:
       version: "1.0.0"
       description: "Exposição de serviços HTTP e roteamento por path."
       created: "2025-11-11T12:00:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/02-httproute/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/02-httproute/lab.yaml"
       digest: "sha256:c90d39f4733e439625aef1c7250fa3d91f1816068edf95d0b73e4bf090ffdf68"
       maintainers:
         - "Aecio Pires"
@@ -31,7 +31,7 @@ entries:
       version: "1.0.0"
       description: "Exposição de serviços TCP (ex: Redis)."
       created: "2025-11-11T12:10:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/03-tcproute/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/03-tcproute/lab.yaml"
       digest: "sha256:3ba5cfba14b93e45a24882e423dba0cbbef1729c36cdc90ed8418f10a046feff"
       maintainers:
         - "Aecio Pires"
@@ -43,7 +43,7 @@ entries:
       version: "1.0.0"
       description: "Exposição de serviços UDP."
       created: "2025-11-11T12:20:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/04-udproute/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/04-udproute/lab.yaml"
       digest: "sha256:95d93fbe344e5dcbbd067bfbe2c0f0f1eb090af658ef6753b011defdea1cd554"
       maintainers:
         - "Aecio Pires"
@@ -54,7 +54,7 @@ entries:
       version: "1.0.0"
       description: "Configuração de suporte a Websockets via HTTPRoute."
       created: "2025-11-11T12:30:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/05-websocket/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/05-websocket/lab.yaml"
       digest: "sha256:4076604dd93acd237da8feb6e4259078f55a9b385e6b0f76acc630c05d800a61"
       maintainers:
         - "Aecio Pires"
@@ -66,7 +66,7 @@ entries:
       version: "1.0.0"
       description: "Roteamento TLS Passthrough usando SNI."
       created: "2025-11-11T12:40:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/06-tlsroute/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/06-tlsroute/lab.yaml"
       digest: "sha256:2a48201aae3ab788ce09710fea2964f52c3f7c90fd04c5ab19861b312fe42ab9"
       maintainers:
         - "Aecio Pires"
@@ -78,7 +78,7 @@ entries:
       version: "1.0.0"
       description: "Roteamento nativo de gRPC."
       created: "2025-11-11T12:50:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/07-grpcroute/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/07-grpcroute/lab.yaml"
       digest: "sha256:43238f3e35e3c67f343d78ede3ca33446d5f876c5d431e9d1766aebd5c0ce76e"
       maintainers:
         - "Aecio Pires"
@@ -89,7 +89,7 @@ entries:
       version: "1.0.0"
       description: "Gateway API para Service Mesh (Leste-Oeste)."
       created: "2025-11-11T13:00:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/08-mesh-gamma/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/08-mesh-gamma/lab.yaml"
       digest: "sha256:5a9f4fcbe808a55188f08b4a17f546edecdf9e6dacbd8d4313c9d3814de31cd7"
       maintainers:
         - "Aecio Pires"
@@ -101,7 +101,7 @@ entries:
       version: "1.0.0"
       description: "Técnicas de debug, status conditions e logs."
       created: "2025-11-11T13:10:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/09-debug/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/09-debug/lab.yaml"
       digest: "sha256:2840ecda95dde72019b34804ace4e3b0e983b35315eb7450615db1522b084408"
       maintainers:
         - "Aecio Pires"
@@ -113,7 +113,7 @@ entries:
       version: "1.0.0"
       description: "Integração com Datadog para métricas e logs."
       created: "2025-11-11T13:20:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/10-datadog/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/10-datadog/lab.yaml"
       digest: "sha256:684a1b13f8c9fb7dbca1e875821dd74dbed28c2ef0185d996c343bbb251698d9 "
       maintainers:
         - "Aecio Pires"
@@ -125,7 +125,7 @@ entries:
       version: "1.0.0"
       description: "Integração com stack LGTM (Grafana Labs)."
       created: "2025-11-11T13:30:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/11-grafana-stack/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/11-grafana-stack/lab.yaml"
       digest: "sha256:11833322b810911eed10ebb1a68ecb5b8fd74b2e285b9bfdc9f6c85ffa03e0f5"
       maintainers:
         - "Aecio Pires"
@@ -138,7 +138,7 @@ entries:
     - name: "gateway-api-monitoring-victoriametrics"
       version: "1.0.0"
       created: "2025-11-11T13:40:00Z"
-      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/12-victoria-stack/lab.yaml"
+      url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/labs/12-victoria-stack/lab.yaml"
       digest: "sha256:e51513dcccc4e3fc690603c34905a30ed7e349d493466f4ba32f353ba5252465"
       maintainers:
         - "Aecio Pires"
