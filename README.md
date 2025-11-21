@@ -17,7 +17,7 @@ My labs for [girus-cli](https://github.com/badtuxx/girus-cli)
 Read my blog posts about the **Kubernetes Gateway API** (written in Brazilian Portuguese) before completing these labs.
 
 - https://blog.aeciopires.com/conhecendo-o-kubernetes-gateway-api/
-- CHANGE_HERE
+- https://blog.aeciopires.com/aprendendo-kubernetes-gateway-api-na-pratica-com-o-girus-cli/
 
 # Contributing
 
