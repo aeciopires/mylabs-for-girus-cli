@@ -1,0 +1,18 @@
+title: "04 - Exposição com UDPRoute"
+description: "Roteamento de tráfego UDP."
+steps:
+  - title: "Deploy App UDP"
+    text: |
+      Vamos usar uma imagem `agnhost` para servir como servidor de eco UDP na porta 8081.
+      Crie o deployment e o service.
+    verify: "kubectl get svc udp-echo"
+
+  - title: "Configurar Listener UDP"
+    text: |
+      Adicione um listener ao seu Gateway na porta 8081 com protocolo UDP.
+    verify: "kubectl get gateway my-gateway -o yaml"
+
+  - title: "Criar UDPRoute"
+    text: |
+      Crie um recurso `UDPRoute` apontando para o service `udp-echo`.
+    verify: "kubectl get udproute udp-echo-route"

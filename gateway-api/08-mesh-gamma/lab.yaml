@@ -1,0 +1,18 @@
+title: "08 - GAMMA (Gateway API for Mesh)"
+description: "Uso do HTTPRoute para tráfego Leste-Oeste (Service to Service)."
+steps:
+  - title: "Pré-requisito: CRDs"
+    text: |
+      Verifique se os CRDs experimentais do Gateway API estão instalados.
+    verify: "kubectl get crd httproutes.gateway.networking.k8s.io"
+
+  - title: "Deploy Servidor"
+    text: |
+      Deploy de um service chamado `server`.
+    verify: "kubectl get svc server || kubectl create svc clusterip server --tcp=80"
+
+  - title: "Criar HTTPRoute para Mesh"
+    text: |
+      Para GAMMA, o `parentRef` do HTTPRoute deve apontar para um **Service** (não Gateway).
+      Crie um HTTPRoute onde `parentRef` seja o Service `server`.
+    verify: "kubectl get httproute mesh-route"

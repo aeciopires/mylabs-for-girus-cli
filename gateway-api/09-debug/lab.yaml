@@ -1,0 +1,27 @@
+title: "09 - Debug e Troubleshooting"
+description: "Diagnóstico de problemas usando Status Conditions e Events."
+steps:
+  - title: "Verificar Status da GatewayClass"
+    text: |
+      Verifique se a GatewayClass foi aceita pelo controller.
+      Procure por `status: conditions: type: Accepted` sendo `True`.
+    verify: "kubectl get gatewayclass eg -o jsonpath='{.status.conditions[?(@.type=="Accepted")].status}'"
+
+  - title: "Debugar Gateway"
+    text: |
+      Use o comando describe para ver eventos do Gateway.
+      `kubectl describe gateway my-gateway`
+    verify: "kubectl get gateway my-gateway"
+
+  - title: "Debugar Rota (Parents Status)"
+    text: |
+      Verifique o status da rota. A Gateway API reporta o status por 'Parent'.
+      Execute: `kubectl describe httproute <nome-da-rota>`
+      Analise a seção `Status > Parents > Conditions`.
+    verify: "kubectl get httproute"
+
+  - title: "Logs do Controller"
+    text: |
+      Se tudo falhar, verifique os logs do pod do Envoy Gateway.
+      `kubectl logs -n envoy-gateway-system -l control-plane=envoy-gateway`
+    verify: "kubectl get pods -n envoy-gateway-system"

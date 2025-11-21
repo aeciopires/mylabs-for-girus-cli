@@ -1,0 +1,13 @@
+title: "07 - GRPCRoute"
+description: "Roteamento nativo de gRPC."
+steps:
+  - title: "Deploy gRPC App"
+    text: |
+      Deploy de um servidor gRPC (ex: yages).
+    verify: "kubectl get svc yages"
+
+  - title: "Criar GRPCRoute"
+    text: |
+      Crie um recurso `GRPCRoute`.
+      Faça o match pelo serviço `yages.Echo` e método `Ping`.
+    verify: "kubectl get grpcroute yages-route"

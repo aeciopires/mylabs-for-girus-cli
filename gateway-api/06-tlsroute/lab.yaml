@@ -1,0 +1,18 @@
+title: "06 - TLSRoute (Passthrough)"
+description: "Roteamento baseado em SNI onde a terminação TLS ocorre na aplicação."
+steps:
+  - title: "Deploy App Seguro"
+    text: |
+      Para este lab, crie um service `my-secure-app` (simulado).
+    verify: "kubectl get svc my-secure-app || kubectl create svc clusterip my-secure-app --tcp=8443"
+
+  - title: "Configurar Gateway TLS Passthrough"
+    text: |
+      Adicione um listener ao Gateway na porta 443, Protocolo TLS, Mode Passthrough.
+      Configure o hostname como `secure.example.com`.
+    verify: "kubectl get gateway my-gateway -o yaml"
+
+  - title: "Criar TLSRoute"
+    text: |
+      Crie um `TLSRoute` que use o SNI `secure.example.com` e direcione para o serviço da aplicação.
+    verify: "kubectl get tlsroute secure-route"

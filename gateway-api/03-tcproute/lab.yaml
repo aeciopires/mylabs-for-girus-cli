@@ -1,0 +1,19 @@
+title: "03 - Exposição com TCPRoute"
+description: "Roteamento de tráfego TCP não-HTTP (ex: Redis)."
+steps:
+  - title: "Deploy do Redis"
+    text: |
+      Faça o deploy de um Redis simples e seu Service na porta 6379.
+    verify: "kubectl get svc redis"
+
+  - title: "Atualizar Gateway para TCP"
+    text: |
+      Edite seu Gateway para adicionar um novo listener na porta 6379 com protocolo TCP.
+      Dica: Use `kubectl edit gateway my-gateway`.
+    verify: "kubectl get gateway -o json | grep 6379"
+
+  - title: "Criar TCPRoute"
+    text: |
+      Crie um manifesto usando o kind `TCPRoute`.
+      Aponte para o service `redis` e referencie o listener TCP do gateway.
+    verify: "kubectl get tcproute redis-route"

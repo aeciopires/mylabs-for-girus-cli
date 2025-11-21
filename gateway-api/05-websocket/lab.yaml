@@ -1,0 +1,13 @@
+title: "05 - Websockets"
+description: "Websockets são tratados nativamente pelo HTTPRoute."
+steps:
+  - title: "Deploy Websocket App"
+    text: |
+      Deploy de uma aplicação de eco websocket (ex: jmalloc/echo-server).
+    verify: "kubectl get svc websocket-app"
+
+  - title: "Criar HTTPRoute para Websocket"
+    text: |
+      O Gateway API trata Websocket como HTTP.
+      Crie um `HTTPRoute` para o service websocket na porta 80.
+    verify: "kubectl get httproute ws-route"

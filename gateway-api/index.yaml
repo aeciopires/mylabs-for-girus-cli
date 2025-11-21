@@ -1,0 +1,60 @@
+labs:
+  - name: "01 - Instalação da Gateway API"
+    path: "./01-instalacao"
+    description: "Instalação dos CRDs padrão da Gateway API e do Envoy Gateway."
+    tags: ["setup", "install", "envoy"]
+
+  - name: "02 - Exposição com HTTPRoute"
+    path: "./02-httproute"
+    description: "Exposição de serviços HTTP e roteamento por path."
+    tags: ["http", "routing"]
+
+  - name: "03 - Exposição com TCPRoute"
+    path: "./03-tcproute"
+    description: "Exposição de serviços TCP (ex: Redis)."
+    tags: ["tcp", "redis"]
+
+  - name: "04 - Exposição com UDPRoute"
+    path: "./04-udproute"
+    description: "Exposição de serviços UDP."
+    tags: ["udp"]
+
+  - name: "05 - Websockets"
+    path: "./05-websocket"
+    description: "Configuração de suporte a Websockets via HTTPRoute."
+    tags: ["websocket", "http"]
+
+  - name: "06 - TLSRoute (Passthrough)"
+    path: "./06-tlsroute"
+    description: "Roteamento TLS Passthrough usando SNI."
+    tags: ["tls", "security"]
+
+  - name: "07 - GRPCRoute"
+    path: "./07-grpcroute"
+    description: "Roteamento nativo de gRPC."
+    tags: ["grpc"]
+
+  - name: "08 - GAMMA (Mesh)"
+    path: "./08-mesh-gamma"
+    description: "Gateway API para Service Mesh (Leste-Oeste)."
+    tags: ["mesh", "gamma"]
+
+  - name: "09 - Debug e Troubleshooting"
+    path: "./09-debug"
+    description: "Técnicas de debug, status conditions e logs."
+    tags: ["debug", "troubleshooting"]
+
+  - name: "10 - Monitoramento com Datadog"
+    path: "./10-datadog"
+    description: "Integração com Datadog para métricas e logs."
+    tags: ["datadog", "observability"]
+
+  - name: "11 - Monitoramento LGTM (Grafana)"
+    path: "./11-grafana-stack"
+    description: "Stack Prometheus, Grafana, Loki e Tempo."
+    tags: ["grafana", "prometheus", "loki", "tempo"]
+
+  - name: "12 - Monitoramento VictoriaMetrics"
+    path: "./12-victoria-stack"
+    description: "Stack VictoriaMetrics para alta performance."
+    tags: ["victoriametrics", "observability"]

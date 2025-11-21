@@ -1,0 +1,22 @@
+title: "10 - Monitoramento com Datadog"
+description: "Configuração de monitoramento e links para dashboards."
+steps:
+  - title: "Habilitar Métricas no Envoy"
+    text: |
+      No `EnvoyProxy` config, habilite a telemetria prometheus.
+      Verifique a documentação do Datadog: [Datadog Envoy Integration](https://docs.datadoghq.com/integrations/envoy/)
+    verify: "kubectl get crd envoyproxies.gateway.envoyproxy.io"
+
+  - title: "Annotations de Autodiscovery"
+    text: |
+      Adicione annotations ao Pod do Envoy para o agente Datadog:
+      `ad.datadoghq.com/envoy.instances: '[{"openmetrics_endpoint": "http://%%host%%:19001/stats/prometheus"}]'`
+    verify: "echo 'Configuração revisada'"
+
+  - title: "Acessar Dashboards"
+    text: |
+      Acesse os dashboards recomendados:
+      - [Monitor: High 5xx Rate](https://app.datadoghq.com/monitors/recommended)
+      - [Dashboard: Envoy Overview](https://app.datadoghq.com/dash/integration/envoy)
+      Confirme que acessou os links.
+    verify: "echo 'Links acessados'"
