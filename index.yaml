@@ -1,8 +1,8 @@
 apiVersion: v1
 generated: "2024-03-20T10:00:00Z"
 entries:
-  lab-name:
-    - name: "01 - Instalação da Gateway API"
+  gateway-api-install:
+    - name: "gateway-api-install"
       version: "1.0.0"
       description: "Instalação dos CRDs padrão da Gateway API e do Envoy Gateway."
       created: "2025-11-11T11:50:00Z"
@@ -14,8 +14,8 @@ entries:
         - setup
         - install
         - gateway api
-
-    - name: "02 - Exposição com HTTPRoute"
+  gateway-api-httproute:
+    - name: "gateway-api-httproute"
       version: "1.0.0"
       description: "Exposição de serviços HTTP e roteamento por path."
       created: "2025-11-11T12:00:00Z"
@@ -26,8 +26,8 @@ entries:
       keywords: 
         - http
         - routing
-
-    - name: "03 - Exposição com TCPRoute"
+  gateway-api-tcproute:
+    - name: "gateway-api-tcproute"
       version: "1.0.0"
       description: "Exposição de serviços TCP (ex: Redis)."
       created: "2025-11-11T12:10:00Z"
@@ -38,8 +38,8 @@ entries:
       keywords: 
         - tcp
         - redis
-
-    - name: "04 - Exposição com UDPRoute"
+  gateway-api-udproute:
+    - name: "gateway-api-udproute"
       version: "1.0.0"
       description: "Exposição de serviços UDP."
       created: "2025-11-11T12:20:00Z"
@@ -49,8 +49,8 @@ entries:
         - "Aecio Pires"
       keywords: 
         - udp
-
-    - name: "05 - Websockets"
+  gateway-api-websockets:
+    - name: "gateway-api-websockets"
       version: "1.0.0"
       description: "Configuração de suporte a Websockets via HTTPRoute."
       created: "2025-11-11T12:30:00Z"
@@ -61,8 +61,8 @@ entries:
       keywords: 
         - websocket
         - http
-
-    - name: "06 - TLSRoute (Passthrough)"
+  gateway-api-tlsroute:
+    - name: "gateway-api-tlsroute"
       version: "1.0.0"
       description: "Roteamento TLS Passthrough usando SNI."
       created: "2025-11-11T12:40:00Z"
@@ -73,8 +73,8 @@ entries:
       keywords: 
         - tls
         - security
-
-    - name: "07 - GRPCRoute"
+  gateway-api-grpcroute:
+    - name: "gateway-api-grpcroute"
       version: "1.0.0"
       description: "Roteamento nativo de gRPC."
       created: "2025-11-11T12:50:00Z"
@@ -84,8 +84,8 @@ entries:
         - "Aecio Pires"
       keywords: 
         - grpc
-
-    - name: "08 - GAMMA (Mesh)"
+  gateway-api-mesh-gamma:
+    - name: "gateway-api-mesh-gamma"
       version: "1.0.0"
       description: "Gateway API para Service Mesh (Leste-Oeste)."
       created: "2025-11-11T13:00:00Z"
@@ -96,8 +96,8 @@ entries:
       keywords: 
         - mesh
         - gamma
-
-    - name: "09 - Debug e Troubleshooting"
+  gateway-api-debug-troubleshooting:
+    - name: "gateway-api-debug-troubleshooting"
       version: "1.0.0"
       description: "Técnicas de debug, status conditions e logs."
       created: "2025-11-11T13:10:00Z"
@@ -108,8 +108,8 @@ entries:
       keywords: 
         - debug
         - troubleshooting
-
-    - name: "10 - Monitoramento com Datadog"
+  gateway-api-monitoring-datadog:
+    - name: "gateway-api-monitoring-datadog"
       version: "1.0.0"
       description: "Integração com Datadog para métricas e logs."
       created: "2025-11-11T13:20:00Z"
@@ -120,8 +120,8 @@ entries:
       keywords: 
         - datadog
         - monitoring
-
-    - name: "11 - Monitoramento LGTM (Grafana)"
+  gateway-api-monitoring-lgtm:
+    - name: "gateway-api-monitoring-lgtm"
       version: "1.0.0"
       description: "Integração com stack LGTM (Grafana Labs)."
       created: "2025-11-11T13:30:00Z"
@@ -134,8 +134,8 @@ entries:
         - loki
         - tempo
         - prometheus
-
-    - name: "12 - Monitoramento VictoriaMetrics"
+  gateway-api-monitoring-victoriametrics:
+    - name: "gateway-api-monitoring-victoriametrics"
       version: "1.0.0"
       created: "2025-11-11T13:40:00Z"
       url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/refs/heads/main/gateway-api/12-victoria-stack/lab.yaml"
