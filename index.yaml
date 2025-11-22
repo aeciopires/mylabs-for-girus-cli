@@ -13,6 +13,4 @@ entries:
         - "Aecio Pires"
       url: "https://raw.githubusercontent.com/aeciopires/mylabs-for-girus-cli/main/labs/gateway-api-install/lab.yaml"
       created: "2025-11-21T14:50:00Z"
-      digest: "sha256:e842f1398363904d040845875573b053e7239325f77c88a4e495713bb482ad91"
-
-
+      digest: "sha256:0104784b34ea977bf6c492d593de98ec9366a87c7b3b4294fc88624d60b4c91f"

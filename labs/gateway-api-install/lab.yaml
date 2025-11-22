@@ -27,20 +27,39 @@ data:
           - "A instalação dos CRDs é o primeiro passo para configurar um gateway no Kubernetes."
           - "Instale os CRDs padrão da Gateway API fornecidos pelo Nginx Gateway Fabric."
           - "A versão edge disponível na branch main é compatível com a versão v1.4 da Gateway API."
-          - "kubectl kustomize https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.1 | kubectl apply -f -"
-          - "kubectl apply --server-side -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/crds.yaml"
+          - |
+            ```
+            kubectl kustomize https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.1 | kubectl apply -f -
+            ```
+          - |
+            ```
+            kubectl apply --server-side -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/crds.yaml
+            ```
           - "Verifique se os CRDs foram instalados corretamente com o seguinte comando."
-          - "kubectl get crds | grep gateway"
+          - |
+            ```
+            kubectl get crds | grep gateway
+            ```
       - name: "Instalar o Nginx Gateway Controller"
         description: "Agora que os CRDs da Gateway API estão instalados, vamos instalar o Nginx Gateway Controller."
         steps:
           - "O Nginx Gateway Controller é responsável por gerenciar os recursos da Gateway API e configurar o Nginx como um gateway."
           - "Instale o Nginx Gateway Controller (no modo NodePort) usando o seguinte comando."
-          - "kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/nodeport/deploy.yaml"
-          - "Verifique os pods no namespace do Nginx Gateway para garantir que o controller está em execução."
-          - "kubectl get pods -n nginx-gateway"
+          - |
+            ```
+            kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/nodeport/deploy.yaml
+            ```
+          - "Verifique os pods no namespace do nginx-gateway para garantir que o controller está em execução."
+          - |
+            ```
+            kubectl get pods -n nginx-gateway
+            ```
+          - "Você deve ver os pods do Nginx Gateway Controller em estado Running."
           - "Verifique os logs do Nginx Gateway Controller para garantir que não há erros."
-          - "kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway"
+          - |
+            ```
+            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway
+            ```
           - "Outras opções de instalação estão disponíveis na documentação oficial:"
           - "- https://docs.nginx.com/nginx-gateway-fabric/install/manifests/"
           - "- https://docs.nginx.com/nginx-gateway-fabric/install/helm/"
@@ -53,7 +72,10 @@ data:
         steps:
           - "Utilize o vim ou nano para criar o arquivo seguinte."
           - "Instale com o seguinte comando."
-          - "apk add vim nano"
+          - |
+            ```
+            apk add vim nano
+            ```
           - "Crie um arquivo YAML chamado gateway.yaml com o seguinte conteúdo."
           - |
             ```
@@ -72,17 +94,32 @@ data:
           - "- gatewayClassName: Define que estamos utilizando a classe de gateway do Nginx."
           - "- Listeners: Configura um listener na porta 80 para tráfego HTTP."
           - "Aplique a configuração para criar o Gateway."
-          - "kubectl apply -f gateway.yaml"
+          - |
+            ```
+            kubectl apply -f gateway.yaml
+            ```
           - "Verifique se o Gateway foi criado corretamente."
-          - "kubectl get gateways"
-          - "kubectl describe gateway nginx-gateway"
+          - |
+            ```
+            kubectl get gateways
+            ```
+          - |
+            ```
+            kubectl describe gateway nginx-gateway
+            ```
           - "Se na coluna PROGRAMED estiver como True, a configuração funcionou."
           - "Isso irá configurar o Nginx Gateway a nível de namespace e é possível criar outros gateways adicionais por namespace conforme necessário."
           - "Liste os serviços no namespace nginx-gateway para encontrar o IP e a porta do gateway."
-          - "kubectl get svc -A"
+          - |
+            ```
+            kubectl get svc -A
+            ```
           - "Anote o IP do nó (NODE-IP) do serviço nginx-gateway-nginx."
           - "Teste o gateway acessando o IP e a porta anotados no navegador ou usando curl."
-          - "curl http://NODE-IP:80"
+          - |
+            ```
+            curl http://NODE-IP:80
+            ```
           - "Você deve ver uma resposta padrão do Nginx (404 Not Found), indicando que o gateway está funcionando corretamente, mas não encontrou uma rota configurada."
       - name: "Configurando um HTTPRoute"
         description: "Agora que o Nginx Gateway está criado, vamos configurar um HTTPRoute simples para duas aplicações."
@@ -163,9 +200,15 @@ data:
           - "- Cada aplicação utiliza a imagem hashicorp/http-echo que retorna uma mensagem HTTP simples."
           - "- Cria dois Services (app1-service e app2-service) para expor as aplicações."
           - "Aplique a configuração para criar os Deployments e Services."
-          - "kubectl apply -f deploy-apps.yaml"
+          - |
+            ```
+            kubectl apply -f deploy-apps.yaml
+            ```
           - "Verifique se os pods e serviços foram criados corretamente."
-          - "kubectl get pods,svc"
+          - |
+            ```
+            kubectl get pods,svc
+            ```
           - "Agora, crie um arquivo YAML chamado httproute.yaml com o seguinte conteúdo para definir as rotas HTTP."
           - |
             ```
@@ -198,22 +241,48 @@ data:
           - "- A primeira regra roteia o tráfego com o prefixo /app1 para o serviço app1-service."
           - "- A segunda regra roteia o tráfego com o prefixo /app2 para o serviço app2-service."
           - "Aplique a configuração para criar o HTTPRoute."
-          - "kubectl apply -f httproute.yaml"
+          - |
+            ```
+            kubectl apply -f httproute.yaml
+            ```
           - "Verifique se o HTTPRoute foi criado corretamente."
-          - "kubectl get httproutes"
-          - "kubectl describe httproute app1-app2-route"
+          - |
+            ```
+            kubectl get httproutes
+            ```
+          - |
+            ```
+            kubectl describe httproute app1-app2-route
+            ```
           - "Teste as rotas configuradas acessando os caminhos /app1 e /app2 no gateway."
-          - "curl http://NODE-IP:80/app1"
-          - "Você deve ver a resposta: This is the APP1"
-          - "curl http://NODE-IP:80/app2"
-          - "Você deve ver a resposta: This is the APP2"
+          - |
+            ```
+            curl http://NODE-IP:80/app1
+            ```
+          - |
+            ```
+            curl http://NODE-IP:80/app2
+            ```
+          - "Você deve ver as respostas específicas de cada aplicação."
           - "Se você receber as respostas corretas, significa que o Nginx Gateway está roteando o tráfego corretamente para as duas aplicações com base nas rotas definidas."
           - "Verifique os logs do Nginx Gateway Controller para monitorar o tráfego e garantir que as requisições estão sendo processadas corretamente."
-          - "kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway"
-          - "kubectl logs -l app.kubernetes.io/name=nginx-gateway-nginx"
+          - |
+            ```
+            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway
+            ```
+          - |
+            ```
+            kubectl logs -l app.kubernetes.io/name=nginx-gateway-nginx
+            ```
           - "Verifique também os logs dos pods das aplicações para garantir que estão recebendo as requisições."
-          - "kubectl logs -l app=app1"
-          - "kubectl logs -l app=app2"
+          - |
+            ```
+            kubectl logs -l app=app1
+            ```
+          - |
+            ```
+            kubectl logs -l app=app2
+            ```
           - "Parabéns! Você configurou com sucesso a Gateway API com o Nginx Gateway Fabric e criou rotas HTTP para duas aplicações diferentes."
           - "Mais informações sobre o gateway API e o Nginx Gateway Fabric podem ser encontradas na documentação oficial:"
           - "- https://gateway-api.sigs.k8s.io/"
