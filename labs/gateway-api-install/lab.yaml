@@ -9,24 +9,32 @@ data:
   lab.yaml: |
     name: gateway-api-install
     title: "Instalação da Gateway API"
-    description: "Neste laboratório, vamos instalar os CRDs padrão da Gateway API e um Gateway Controller (Nginx Gateway Fabric)."
-    duration: 50m
+    description: "Neste laboratório, vamos instalar os CRDs padrão da Gateway API, usando o Nginx Gateway Fabric como GatewayController e conhecer algumas das funcionalidades."
+    duration: 300m
     timerEnabled: true
-    maxDuration: 50m
+    maxDuration: 300m
     image: "linuxtips/girus-kind-single-node:0.1"
     tasks:
       - name: "Instalar os CRDs do Gateway API"
         description: "O Gateway API é baseado em CRDs (Custom Resource Definitions)."
         steps:
+          - "Este laboratório é um complemento à teoria apresentada nas páginas abaixo:"
+          - "- https://blog.aeciopires.com/conhecendo-o-kubernetes-gateway-api/"
+          - "- https://blog.aeciopires.com/aprendendo-kubernetes-gateway-api-na-pratica-com-o-girus-cli/"
           - "O Gateway API é uma especificação para gerenciar gateways de rede no Kubernetes."
-          - "Existem várias implementações de Gateway API, e neste laboratório, usaremos o Nginx Gateway Fabric como nosso controlador de gateway."
-          - "A página mostra as demais implementações disponíveis: https://gateway-api.sigs.k8s.io/implementations/"
-          - "A tabela https://github.com/nginx/nginx-gateway-fabric/tree/main?tab=readme-ov-file#technical-specifications lista as versões do Nginx Gateway Fabric e suas compatibilidades com as versões da Gateway API: https://gateway-api.sigs.k8s.io/implementations/v1.4/."
-          - "Os Custom Resource Definitions (CRDs) estendem a API do Kubernetes, permitindo que o Nginx Fabric Gateway funcione corretamente."
+          - "Existem várias implementações de Gateway API, e neste laboratório, usaremos o Nginx Gateway Fabric como nosso controlador de gateway (GatewayController)."
+          - "Os outros softwares que implementam o GatewayController e podem ser encontrados em: https://gateway-api.sigs.k8s.io/implementations/"
+          - "Os links abaixo fornecem mais informações sobre o Nginx Gateway Fabric:"
+          - "- Tabela de compatibilidade dos CRDs: https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/"
+          - "- Tabela de versões: https://github.com/nginx/nginx-gateway-fabric/tree/main?tab=readme-ov-file#technical-specifications"
+          - "- Especificações do Gateway API: https://gateway-api.sigs.k8s.io/implementations/v1.4/"
+          - "- Documentação do Kubernetes Gateway API: https://gateway-api.sigs.k8s.io/"
+          - "- Documentação do Nginx Gateway Fabric: https://docs.nginx.com/nginx-gateway-fabric/"
+          - "Os Custom Resource Definitions (CRDs) estendem a API do Kubernetes, permitindo que o Nginx Gateway Fabric funcione corretamente."
           - "O Gateway API define vários CRDs, como GatewayClass, Gateway, HTTPRoute, TCPRoute, entre outros."
           - "A instalação dos CRDs é o primeiro passo para configurar um gateway no Kubernetes."
           - "Instale os CRDs padrão da Gateway API fornecidos pelo Nginx Gateway Fabric."
-          - "A versão edge disponível na branch main é compatível com a versão v1.4 da Gateway API."
+          - "A versão edge disponível na branch 'main' é compatível com a versão 'v1.4' da Gateway API."
           - |
             ```
             kubectl kustomize https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.1 | kubectl apply -f -
@@ -40,43 +48,66 @@ data:
             ```
             kubectl get crds | grep gateway
             ```
+
       - name: "Instalar o Nginx Gateway Controller"
-        description: "Agora que os CRDs da Gateway API estão instalados, vamos instalar o Nginx Gateway Controller."
+        description: "Agora que os CRDs da Gateway API estão instalados, vamos instalar o Nginx Gateway Fabric."
         steps:
-          - "O Nginx Gateway Controller é responsável por gerenciar os recursos da Gateway API e configurar o Nginx como um gateway."
-          - "Instale o Nginx Gateway Controller (no modo NodePort) usando o seguinte comando."
+          - "O Nginx Gateway Fabric implementa o GatewayController e é responsável por gerenciar os recursos da Gateway API."
+          - "Instale-o no modo NodePort usando o seguinte comando."
           - |
             ```
             kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/nodeport/deploy.yaml
             ```
-          - "Verifique os pods no namespace do nginx-gateway para garantir que o controller está em execução."
+          - "Verifique os objetos criados no namespace do 'nginx-gateway'."
+          - |
+            ```
+            kubectl get all -n nginx-gateway
+            ```
+          - "Verifique detalhes do deployment do 'nginx-gateway' no namespace 'nginx-gateway'."
+          - |
+            ```
+            kubectl describe deployment nginx-gateway -n nginx-gateway
+            ```
+          - "Observe na seção Args que o controller está sendo configurado para criar a 'gatewayclass=nginx'. Falaremos sobre ela mais adiante."
+          - "Verifique os pods no namespace do 'nginx-gateway' para garantir que o GatewayController está em execução."
           - |
             ```
             kubectl get pods -n nginx-gateway
             ```
-          - "Você deve ver os pods do Nginx Gateway Controller em estado Running."
-          - "Verifique os logs do Nginx Gateway Controller para garantir que não há erros."
+          - "Você deve ver os pods do Nginx Gateway em estado 'Running'."
+          - "Verifique os logs para garantir que não há erros."
           - |
             ```
-            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway
+            kubectl logs -l app.kubernetes.io/name=nginx-gateway -n nginx-gateway 
             ```
           - "Outras opções de instalação estão disponíveis na documentação oficial:"
-          - "- https://docs.nginx.com/nginx-gateway-fabric/install/manifests/"
-          - "- https://docs.nginx.com/nginx-gateway-fabric/install/helm/"
-          - "- https://artifacthub.io/packages/helm/nginx-gateway-fabric/nginx-gateway-fabric"
-          - "Na página a seguir você encontra mais detalhes sobre o Nginx Gateway Fabric e de troubleshooting:"
+          - "- Usando manifests: https://docs.nginx.com/nginx-gateway-fabric/install/manifests/"
+          - "- Usando o helm:"
+          - "  - https://docs.nginx.com/nginx-gateway-fabric/install/helm/"
+          - "  - https://artifacthub.io/packages/helm/nginx-gateway-fabric/nginx-gateway-fabric"
+          - "Na página a seguir você encontra mais detalhes sobre o Nginx Gateway Fabric e sobre como fazer o troubleshooting:"
           - "- https://docs.nginx.com/nginx-gateway-fabric/troubleshooting/"
           - "- https://github.com/nginx/nginx-gateway-fabric/"
+
       - name: "Criando o Gateway"
-        description: "Agora que o Nginx Gateway Controller está instalado, vamos criar um Gateway simples."
+        description: "Agora que o Nginx Gateway Fabric está instalado, vamos criar um gateway simples."
         steps:
-          - "Utilize o vim ou nano para criar o arquivo seguinte."
-          - "Instale com o seguinte comando."
+          - "Instale os editores de texto 'vim' e 'nano' com o seguinte comando."
           - |
             ```
             apk add vim nano
             ```
-          - "Crie um arquivo YAML chamado gateway.yaml com o seguinte conteúdo."
+          - "Crie um arquivo YAML chamado 'gateway.yaml'."
+          - "Utilize o 'vim' ou 'nano' para criar/editar os arquivos conforme o seu critério e conhecimento. Exemplo:"
+          - |
+            ```
+            vim gateway.yaml
+
+            # Ou:
+
+            nano gateway.yaml
+            ```
+          - "Adicione o seguinte conteúdo ao arquivo."
           - |
             ```
             apiVersion: gateway.networking.k8s.io/v1beta1
@@ -91,8 +122,8 @@ data:
                   port: 80
             ```
           - "Explicação:"
-          - "- gatewayClassName: Define que estamos utilizando a classe de gateway do Nginx."
-          - "- Listeners: Configura um listener na porta 80 para tráfego HTTP."
+          - "- 'gatewayClassName': Define que estamos utilizando a classe de gateway do 'nginx', criado no exercício anterior."
+          - "- 'listeners': Configura um listener na porta 80 para receber o tráfego HTTP."
           - "Aplique a configuração para criar o Gateway."
           - |
             ```
@@ -103,24 +134,101 @@ data:
             ```
             kubectl get gateways
             ```
+          - "Se na coluna PROGRAMED estiver como True, a configuração funcionou."
+          - "Veja mais detalhes do Gateway criado."
           - |
             ```
             kubectl describe gateway nginx-gateway
             ```
-          - "Se na coluna PROGRAMED estiver como True, a configuração funcionou."
-          - "Isso irá configurar o Nginx Gateway a nível de namespace e é possível criar outros gateways adicionais por namespace conforme necessário."
-          - "Liste os serviços no namespace nginx-gateway para encontrar o IP e a porta do gateway."
+          - "Essa ação também cria os objetos: service, deployment, pod e replicaset do GatewayController no namespace 'nginx-gateway'. Verifique os recursos criados com o comando abaixo."
           - |
             ```
-            kubectl get svc -A
+            kubectl get all -n nginx-gateway
             ```
-          - "Anote o IP do nó (NODE-IP) do serviço nginx-gateway-nginx."
-          - "Teste o gateway acessando o IP e a porta anotados no navegador ou usando curl."
+          - "Esse gateway faz uso do GatewayClass 'nginx'."         
+          - "GatewayClass define a implementação do controlador de gateway (neste caso, é o Nginx Gateway Fabric)."
+          - "A configuração do GatewayClass 'nginx' é definida a nível de cluster."
+          - "O GatewayClass 'nginx' foi criado durante a instalação do Nginx Gateway Fabric."
+          - "Verifique o criação do objeto GatewayClass 'nginx'."
+          - |
+            ```
+            kubectl get gatewayclass
+            ```
+          - "Veja mais detalhes do GatewayClass 'nginx'."
+          - |
+            ```
+            kubectl describe gatewayclass nginx
+            ```
+          - "Os Gateways são CRDs namespace-scoped, ou seja, são criados dentro de um namespace específico e fazem uso do GatewayClass."
+          - "Neste caso, o Gateway 'nginx-gateway' foi criado no namespace padrão deste laboratório: 'lab-test-user'."
+          - "Você pode usar o comando abaixo para verificar que foi criado um deployment chamado 'nginx-gateway-nginx' no namespace 'lab-test-user'. Esse deployment é uma a instância do CRD Gateway criado anteriormente."
+          - |
+            ```
+            kubectl get deployments -n lab-test-user
+            ```
+          - "Veja mais detalhes deste deployment."
+          - |
+            ```
+            kubectl describe deployment nginx-gateway-nginx -n lab-test-user
+            ```
+          - "Você pode verificar que um pod associado ao 'nginx-gateway-nginx' foi criado no namespace 'lab-test-user' com o seguinte comando:"
+          - |
+            ```
+            kubectl get pods -n lab-test-user
+            ```
+          - "Veja mais detalhes do pod gateway com o seguinte comando."
+          - |
+            ```
+            kubectl describe pod POD_NAME -n lab-test-user
+            ```
+          - "OBS.: É possível criar outros gateways por namespace conforme necessário."
+          - "Liste os serviços no namespace 'lab-test-user' para encontrar o IP e a porta do gateway."
+          - |
+            ```
+            kubectl get service -n lab-test-user
+            ```
+          - "Anote o IP do nó (NODE-IP) do serviço 'nginx-gateway-nginx'."
+          - "Se você perceber, é o mesmo IP do 'nginx-gateway' mostrado no comando a seguir."
+          - |
+            ```
+            kubectl get gateways nginx-gateway -o jsonpath='{.status.addresses[0].value}'
+            ```
+          - "Teste o gateway acessando o IP e a porta usando curl."
           - |
             ```
             curl http://NODE-IP:80
             ```
           - "Você deve ver uma resposta padrão do Nginx (404 Not Found), indicando que o gateway está funcionando corretamente, mas não encontrou uma rota configurada."
+          - "Usando o comando abaixo, você pode verificar quais os recursos que o gateway 'nginx-gateway' suporta."
+          - |
+            ```
+            # Instalando o jq
+            apk add jq
+
+            # Obtendo os recursos suportados pelo gateway
+            kubectl get gateways nginx-gateway -o jsonpath='{.status.listeners[0].supportedKinds}' | jq
+            ```
+          - "Isso indica que o gateway suporta recursos do tipo HTTPRoute e GRPCRoute."
+          - "Você pode obter mais informações sobre estes recursos suportados com os comandos abaxo:"
+          - |
+            ```
+            kubectl explain httproute
+            kubectl explain httproute.spec
+            kubectl explain httproute.spec.rules
+            kubectl explain httproute.spec.rules.backendRefs
+            kubectl explain httproute.spec.rules.matches
+            kubectl explain httproute.spec.rules.filters
+
+            kubectl explain grpcroute
+            kubectl explain grpcroute.spec
+            kubectl explain grpcroute.spec.rules
+            kubectl explain grpcroute.spec.rules.backendRefs
+            kubectl explain grpcroute.spec.rules.matches
+            kubectl explain grpcroute.spec.rules.filters
+            ```
+          - "Nas próximas seções, você aprenderá a configurar rotas para esses e outros dos recursos do Gateway API."
+          - "Parabéns! Você criou com sucesso um Gateway usando o Nginx Gateway Fabric."
+
       - name: "Configurando um HTTPRoute"
         description: "Agora que o Nginx Gateway está criado, vamos configurar um HTTPRoute simples para duas aplicações."
         steps:
@@ -284,7 +392,1824 @@ data:
             kubectl logs -l app=app2
             ```
           - "Parabéns! Você configurou com sucesso a Gateway API com o Nginx Gateway Fabric e criou rotas HTTP para duas aplicações diferentes."
-          - "Mais informações sobre o gateway API e o Nginx Gateway Fabric podem ser encontradas na documentação oficial:"
-          - "- https://gateway-api.sigs.k8s.io/"
-          - "- https://docs.nginx.com/nginx-gateway-fabric/"
-          - "Você pode expandir essa configuração adicionando mais rotas, serviços e personalizando o comportamento do gateway conforme necessário."
+
+      - name: "Entendendo o HTTPRoute"
+        description: "HTTPRoute é um recurso da Gateway API para rotear tráfego HTTP/HTTPS"
+        steps:
+          - "HTTPRoute é um CRD (Custom Resource Definition) que define como rotear o tráfego HTTP/HTTPS para serviços de backend."
+          - "HTTPRoute permite roteamento baseado em:"
+          - "- Caminho (Path): /api, /usuarios, etc"
+          - "- Host/Hostname: exemplo.com.br, api.exemplo.com.br"
+          - "- Headers: X-Custom-Header, Authorization, etc"
+          - "- Query parameters: ?versao=v2"
+          - "- Métodos HTTP: GET, POST, PUT, DELETE, etc"
+          - "Documentação oficial: https://gateway-api.sigs.k8s.io/api-types/httproute/"
+          - "Compatibilidade Nginx Gateway Fabric 2.2.1: https://github.com/nginx/nginx-gateway-fabric/releases/tag/v2.2.1"
+          - "No exercício anterior você criou um HTTPRoute simples que roteia o tráfego baseado em path (/app1 e /app2)."
+          - "Agora, vamos explorar mais exemplos avançados de HTTPRoute."
+          - "No exercício a seguir, você criará um HTTPRoute que fará o roteamento baseado em headers HTTP."
+          - "Crie um arquivo YAML chamado httproute-header.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: api-route-header
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              rules:
+                - matches:
+                    - headers:
+                        - name: "X-API-Version"
+                          value: "v1"
+                  backendRefs:
+                    - name: app1-service
+                      port: 80
+                - matches:
+                    - headers:
+                        - name: "X-API-Version"
+                          value: "v2"
+                  backendRefs:
+                    - name: app2-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- Essa HTTPRoute roteia baseado no valor do header 'X-API-Version'"
+          - "- Se X-API-Version=v1, vai para app1-service"
+          - "- Se X-API-Version=v2, vai para app2-service"
+          - "- O path não é considerado nesse exemplo, apenas o header. Logo, todas as requisições serão feitas no path /, que é o padrão."
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f httproute-header.yaml
+            ```
+          - "Verifique todas as HTTPRoutes criadas:"
+          - |
+            ```
+            kubectl get httproute
+            ```
+          - |
+            ```
+            kubectl describe httproute api-route-header
+            ```
+          - "Teste o roteamento baseado em headers usando curl:"
+          - |
+            ```
+            curl -H "X-API-Version: v1" http://NODE-IP:80/
+            ```
+          - |
+            ```
+            curl -H "X-API-Version: v2" http://NODE-IP:80/
+            ```
+          - "Você deve ver respostas diferentes baseadas no header X-API-Version."
+          - "Verifique os logs do gateway e das aplicações:"
+          - |
+            ```
+            kubectl logs -l app.kubernetes.io/name=nginx-gateway-nginx
+            ```
+          - "Verifique também os logs dos pods das aplicações para garantir que estão recebendo as requisições."
+          - |
+            ```
+            kubectl logs -l app=app1
+            ```
+          - |
+            ```
+            kubectl logs -l app=app2
+            ```
+          - "Agora, vamos criar um HTTPRoute que faz roteamento baseado em pesos (load balancing)."
+          - "Crie um arquivo YAML chamado httproute-weighted.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: api-route-weighted
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "weighted-api.local"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/api"
+                  backendRefs:
+                    - name: app1-service
+                      port: 80
+                      weight: 90
+                    - name: app2-service
+                      port: 80
+                      weight: 10
+            ```
+          - "Explicação:"
+          - "- weighted-api.local é o hostname para essa rota que você informará num header Host nas requisições curl."
+          - "- Roteia o tráfego com path /api entre dois backends com pesos diferentes."
+          - "- Essa HTTPRoute distribui o tráfego entre dois backends"
+          - "- 90% do tráfego vai para app1-service (versão estável)"
+          - "- 10% do tráfego vai para app2-service (versão canary)"
+          - "- Útil para testes de canary deployment"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f httproute-weighted.yaml
+            ```
+          - "Verifique todas as HTTPRoutes criadas:"
+          - |
+            ```
+            kubectl get httproute
+            ```
+          - |
+            ```
+            kubectl describe httproute api-route-weighted
+            ```
+          - "Teste a HTTPRoute com pesos (execute várias vezes):"
+          - |
+            ```
+            curl -H "Host: weighted-api.local" http://NODE-IP:80/api
+            ```
+          - "Você deve ver principalmente respostas da v1 com ocasionalmente respostas da v2"
+          - "Verifique os logs do gateway e das aplicações:"
+          - |
+            ```
+            kubectl logs -l app.kubernetes.io/name=nginx-gateway-nginx
+            ```
+          - "Verifique também os logs dos pods das aplicações para garantir que estão recebendo as requisições."
+          - |
+            ```
+            kubectl logs -l app=app1
+            ```
+          - |
+            ```
+            kubectl logs -l app=app2
+            ```
+          - "Perceba que nos logs você verá mais requisições chegando no app1 do que no app2, refletindo os pesos configurados."
+          - "O HTTPRoute suporta diversos tipos de match:"
+          - "- PathPrefix: Prefixo do caminho (/api, /users, etc)"
+          - "- Exact: Caminho exato (/api/users, etc)"
+          - "- RegularExpression: Expressão regular"
+          - "- Headers: Valores de headers HTTP"
+          - "- QueryParams: Parâmetros de query (?key=value)"
+          - "- Method: Método HTTP (GET, POST, etc)"
+          - "Documentação: https://kubernetes.io/docs/concepts/services-networking/gateway/"
+          - "Referência completa da API: https://gateway-api.sigs.k8s.io/references/spec/"
+          - "Mais exemplos: https://github.com/nginx/nginx-gateway-fabric/tree/main/examples"
+          - "Você completou este laboratório com sucesso!"
+          - "Próximas etapas:"
+          - "- Explore TCPRoute para roteamento em camada 4"
+          - "- Configure HTTPS/TLS com o Nginx Gateway"
+          - "- Implemente circuit breakers e timeouts"
+          - "- Configure rate limiting com policies"
+
+      - name: "Entender o TCPRoute"
+        description: "TCPRoute é um recurso da Gateway API para roteamento de camada 4"
+        steps:
+          - "TCPRoute é um CRD que permite rotear tráfego TCP genérico (não HTTP/HTTPS)."
+          - "Diferentemente do HTTPRoute, TCPRoute opera na camada de transporte (camada 4 do OSI)."
+          - "TCPRoute é ideal para:"
+          - "- Bancos de dados: PostgreSQL, MySQL, MongoDB, etc"
+          - "- Cache: Redis, Memcached, etc"
+          - "- Message brokers: AMQP, MQTT, etc"
+          - "- Qualquer aplicação TCP customizada"
+          - "TCPRoute não analisa o conteúdo da conexão, apenas roteia o tráfego TCP."
+          - "Documentação: https://gateway-api.sigs.k8s.io/guides/tcp/"
+          - "Ainda está na fase experimental mas o Nginx Gateway Fabric 2.2.1 suporta TCPRoute"
+          - "O Gateway API Nginx padrão tem apenas um listener HTTP na porta 80."
+          - "Para usar TCPRoute, precisamos adicionar outro listener TCP ao Gateway."
+          - "Crie um arquivo chamado gateway-tcp-update.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1beta1
+            kind: Gateway
+            metadata:
+              name: nginx-gateway
+            spec:
+              gatewayClassName: nginx
+              listeners:
+                - name: http
+                  protocol: HTTP
+                  port: 80
+                - name: tcp-5432
+                  protocol: TCP
+                  port: 5432
+                - name: tcp-6379
+                  protocol: TCP
+                  port: 6379
+            ```
+          - "Explicação:"
+          - "- Mantemos o listener HTTP na porta 80"
+          - "- Adicionamos listener TCP na porta 5432 (PostgreSQL)"
+          - "- Adicionamos listener TCP na porta 6379 (Redis)"
+          - "Atualize o Gateway:"
+          - |
+            ```
+            kubectl apply -f gateway-tcp-update.yaml
+            ```
+          - "Verifique se o Gateway foi atualizado:"
+          - |
+            ```
+            kubectl get gateway nginx-gateway
+            ```
+          - |
+            ```
+            kubectl describe gateway nginx-gateway
+            ```
+          - "Aguarde alguns momentos para o Nginx recarregar a configuração"
+          - "Vamos criar uma aplicação TCP simples que responde em uma porta específica"
+          - "Crie um arquivo chamado tcp-app-deploy.yaml:"
+          - |
+            ```
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: tcp-echo-5432
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: tcp-echo
+                  port: "5432"
+              template:
+                metadata:
+                  labels:
+                    app: tcp-echo
+                    port: "5432"
+                spec:
+                  containers:
+                    - name: tcp-echo
+                      image: nicolaka/netcat
+                      command: 
+                        - sh
+                        - -c
+                        - "while true; do echo 'PostgreSQL Echo Server'; nc -l -p 5432 -e cat; done"
+                      ports:
+                        - containerPort: 5432
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: tcp-echo-5432-service
+            spec:
+              selector:
+                app: tcp-echo
+                port: "5432"
+              ports:
+                - protocol: TCP
+                  port: 5432
+                  targetPort: 5432
+              type: ClusterIP
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: tcp-echo-6379
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: tcp-echo
+                  port: "6379"
+              template:
+                metadata:
+                  labels:
+                    app: tcp-echo
+                    port: "6379"
+                spec:
+                  containers:
+                    - name: tcp-echo
+                      image: nicolaka/netcat
+                      command: 
+                        - sh
+                        - -c
+                        - "while true; do echo 'Redis Echo Server'; nc -l -p 6379 -e cat; done"
+                      ports:
+                        - containerPort: 6379
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: tcp-echo-6379-service
+            spec:
+              selector:
+                app: tcp-echo
+                port: "6379"
+              ports:
+                - protocol: TCP
+                  port: 6379
+                  targetPort: 6379
+              type: ClusterIP
+            ```
+          - "Explicação:"
+          - "- Criamos 2 Deployments TCP simulando PostgreSQL (porta 5432) e Redis (porta 6379)"
+          - "- Cada um com 2 réplicas"
+          - "- Os pods simplesmente ecoam dados TCP recebidos"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f tcp-app-deploy.yaml
+            ```
+          - "Verifique os recursos criados:"
+          - |
+            ```
+            kubectl get pods,svc -l app=tcp-echo
+            ```
+          - "Crie um arquivo chamado tcproute-5432.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1alpha2
+            kind: TCPRoute
+            metadata:
+              name: tcp-route-5432
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: tcp-5432
+              rules:
+                - backendRefs:
+                    - name: tcp-echo-5432-service
+                      port: 5432
+            ```
+          - "Explicação:"
+          - "- parentRefs: Referencia o Gateway 'nginx-gateway' e o listener 'tcp-5432'"
+          - "- sectionName: Especifica qual listener TCP usar (deve corresponder ao nome do listener)"
+          - "- backendRefs: Define o serviço de backend"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f tcproute-5432.yaml
+            ```
+          - "Verifique o TCPRoute:"
+          - |
+            ```
+            kubectl get tcproute
+            ```
+          - |
+            ```
+            kubectl describe tcproute tcp-route-5432
+            ```
+          - "Crie um arquivo chamado tcproute-6379.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1alpha2
+            kind: TCPRoute
+            metadata:
+              name: tcp-route-6379
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: tcp-6379
+              rules:
+                - backendRefs:
+                    - name: tcp-echo-6379-service
+                      port: 6379
+            ```
+          - "Explicação:"
+          - "- parentRefs: Referencia o Gateway 'nginx-gateway' e o listener 'tcp-6379'"
+          - "- sectionName: Especifica qual listener TCP usar (deve corresponder ao nome do listener)"
+          - "- backendRefs: Define o serviço de backend"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f tcproute-6379.yaml
+            ```
+          - "Verifique os TCPRoutes criados:"
+          - |
+            ```
+            kubectl get tcproute -o wide
+            ```
+          - "Teste a conexão TCP na porta 5432:"
+          - |
+            ```
+            nc -zv NODE-IP 5432
+            ```
+          - "Ou com um pod no cluster:"
+          - |
+            ```
+            kubectl run -it --rm debug --image=nicolaka/netcat --restart=Never -- \
+            nc -v nginx-gateway-nginx.nginx-gateway.svc.cluster.local 5432
+            ```
+          - "Teste a conexão TCP na porta 6379:"
+          - |
+            ```
+            kubectl run -it --rm debug --image=nicolaka/netcat --restart=Never -- \
+            nc -v nginx-gateway-nginx.nginx-gateway.svc.cluster.local 6379
+            ```
+          - "Teste com envio de dados:"
+          - |
+            ```
+            echo "SELECT 1;" | nc nginx-gateway-nginx.nginx-gateway.svc.cluster.local 5432
+            ```
+          - "Verifique os logs do Nginx Gateway:"
+          - |
+            ```
+            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway --tail=50
+            ```
+          - "Verifique os logs dos pods TCP:"
+          - |
+            ```
+            kubectl logs -l app=tcp-echo --tail=50
+            ```
+          - "TCPRoute também suporta múltiplos backends (backendRefs)."
+          - "Crie um arquivo chamado tcproute-multi-backend.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1alpha2
+            kind: TCPRoute
+            metadata:
+              name: tcp-route-multi
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: tcp-5432
+              rules:
+                - backendRefs:
+                    - name: tcp-echo-5432-service
+                      port: 5432
+                      weight: 70
+                    - name: tcp-echo-6379-service
+                      port: 6379
+                      weight: 30
+            ```
+          - "Nota: Nginx Gateway Fabric pode ter limitações com múltiplos backends em TCPRoute"
+          - "Consulte a documentação oficial para mais informações"
+          - "TCPRoute é essencial para expor aplicações não-HTTP em Kubernetes"
+          - "Você completou o laboratório TCPRoute com sucesso!"
+
+      - name: "Entender o WebSocket com Gateway API"
+        description: "WebSocket é um protocolo de comunicação bidirecional sobre HTTP/HTTPS"
+        steps:
+          - "WebSocket permite comunicação full-duplex entre cliente e servidor."
+          - "Diferentemente de HTTP tradicional (request/response), WebSocket mantém uma conexão persistente."
+          - "WebSocket é essencial para:"
+          - "- Chat em tempo real"
+          - "- Dashboards com atualização em tempo real"
+          - "- Notificações push"
+          - "- Colaboração em tempo real"
+          - "Com Gateway API, configuramos WebSocket através de HTTPRoute."
+          - "O Nginx Gateway Fabric automaticamente identifica upgrade para WebSocket."
+          - "Documentação WebSocket: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket"
+          - "Gateway API suporta WebSocket naturalmente via HTTPRoute"
+          - "Vamos usar uma imagem Docker com servidor WebSocket echo"
+          - "Crie um arquivo chamado websocket-app-deploy.yaml:"
+          - |
+            ```
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: websocket-echo
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: websocket-echo
+              template:
+                metadata:
+                  labels:
+                    app: websocket-echo
+                spec:
+                  containers:
+                    - name: websocket-echo
+                      image: jmalloc/echo-server
+                      ports:
+                        - containerPort: 8080
+              environment:
+                - name: PORT
+                  value: "8080"
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: websocket-echo-service
+            spec:
+              selector:
+                app: websocket-echo
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 8080
+              type: ClusterIP
+            ```
+          - "Explicação:"
+          - "- Usamos a imagem jmalloc/echo-server que implementa um servidor WebSocket echo"
+          - "- 2 réplicas para alta disponibilidade"
+          - "- Service na porta 80 redirecionando para porta 8080"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f websocket-app-deploy.yaml
+            ```
+          - "Verifique os pods:"
+          - |
+            ```
+            kubectl get pods -l app=websocket-echo
+            ```
+          - |
+            ```
+            kubectl logs -l app=websocket-echo --tail=20
+            ```
+          - "WebSocket é suportado através de HTTPRoute normal."
+          - "O Nginx detecta automaticamente o upgrade para WebSocket."
+          - "Crie um arquivo chamado httproute-websocket.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: websocket-route
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "websocket.local"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/ws"
+                  backendRefs:
+                    - name: websocket-echo-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/"
+                  backendRefs:
+                    - name: websocket-echo-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- parentRefs: Referencia o Gateway 'nginx-gateway'"
+          - "- hostnames: Define 'websocket.local' para essa rota"
+          - "- rules: Define dois matches para /ws e /"
+          - "- Ambos roteiam para websocket-echo-service"
+          - "- Nginx automaticamente interpreta como WebSocket quando necessário"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f httproute-websocket.yaml
+            ```
+          - "Verifique o HTTPRoute:"
+          - |
+            ```
+            kubectl get httproute
+            ```
+          - |
+            ```
+            kubectl describe httproute websocket-route
+            ```
+          - "Crie um arquivo chamado httproute-websocket-advanced.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: websocket-route-advanced
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "chat.local"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/chat"
+                      headers:
+                        - name: "X-Client-Type"
+                          value: "mobile"
+                  backendRefs:
+                    - name: websocket-echo-service
+                      port: 80
+                      weight: 100
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/chat"
+                      headers:
+                        - name: "X-Client-Type"
+                          value: "web"
+                  backendRefs:
+                    - name: websocket-echo-service
+                      port: 80
+                      weight: 100
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/chat"
+                  backendRefs:
+                    - name: websocket-echo-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- Roteia /chat com diferentes comportamentos por header"
+          - "- X-Client-Type: mobile"
+          - "- X-Client-Type: web"
+          - "- Default sem header específico"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f httproute-websocket-advanced.yaml
+            ```
+          - "Teste a conexão WebSocket usando wscat (cliente WebSocket):"
+          - |
+            ```
+            kubectl run -it --rm debug --image=curlimages/curl --restart=Never -- \
+            sh -c "apk add nodejs npm && npm install -g wscat && \
+            wscat -c 'ws://nginx-gateway-nginx.nginx-gateway.svc.cluster.local/ws' -H 'Host: websocket.local'"
+            ```
+          - "Ou use um pod Python com websocket-client:"
+          - |
+            ```
+            kubectl run -it --rm debug --image=python:3.11 --restart=Never -- \
+            python3 -c "
+            import websocket
+            ws = websocket.create_connection('ws://nginx-gateway-nginx.nginx-gateway.svc.cluster.local/ws', header=['Host: websocket.local'])
+            ws.send('Hello WebSocket')
+            print('Response:', ws.recv())
+            ws.close()
+            "
+            ```
+          - "Alternativa com netcat para observar upgrade:"
+          - |
+            ```
+            (echo -ne 'GET /ws HTTP/1.1\r\nHost: websocket.local\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\nSec-WebSocket-Version: 13\r\n\r\n'; sleep 10) | \
+            nc nginx-gateway-nginx.nginx-gateway.svc.cluster.local 80
+            ```
+          - "Você deve ver a resposta HTTP 101 Switching Protocols"
+          - "Verifique os logs do Nginx Gateway:"
+          - |
+            ```
+            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway --tail=50
+            ```
+          - "Verifique os logs da aplicação WebSocket:"
+          - |
+            ```
+            kubectl logs -l app=websocket-echo --tail=50 -f
+            ```
+          - "Considerações para produção:"
+          - "- Timeout de conexão: Configure timeouts adequados"
+          - "- Load balancing: Sticky sessions podem ser necessárias"
+          - "- Health checks: Configure health checks para WebSocket"
+          - "- Security: Implemente TLS/HTTPS para segurança"
+          - "- Rate limiting: Proteja contra abuso"
+          - "Nginx Gateway Fabric suporta:"
+          - "- WebSocket sem modificações especiais"
+          - "- Múltiplos backends com load balancing"
+          - "- Path-based routing para diferentes WebSocket endpoints"
+          - "- Header-based routing condicional"
+
+      - name: "Entender o TLSRoute"
+        description: "TLSRoute para roteamento de conexões TLS encriptadas"
+        steps:
+          - "TLSRoute é um CRD que permite rotear tráfego TLS/SSL na camada 4."
+          - "Diferente de HTTPRoute, TLSRoute roteia baseado em SNI (Server Name Indication)."
+          - "TLSRoute é ideal para:"
+          - "- HTTPS com terminação TLS no gateway"
+          - "- Aplicações que requerem certificados específicos"
+          - "- Roteamento baseado em hostname com TLS"
+          - "SNI (Server Name Indication): Permite múltiplos certificados em um IP."
+          - "Documentação: https://gateway-api.sigs.k8s.io/api-types/tlsroute/"
+          - "Nginx Gateway Fabric 2.2.1 suporta TLSRoute"
+          - "Vamos criar certificados autoassinados para demonstração."
+          - "Gere certificado para app1.local:"
+          - |
+            ```
+            openssl req -x509 -newkey rsa:2048 -keyout app1-tls.key -out app1-tls.crt \
+              -days 365 -nodes -subj "/CN=app1.local"
+            ```
+          - "Gere certificado para app2.local:"
+          - |
+            ```
+            openssl req -x509 -newkey rsa:2048 -keyout app2-tls.key -out app2-tls.crt \
+              -days 365 -nodes -subj "/CN=app2.local"
+            ```
+          - "Crie secrets com os certificados:"
+          - |
+            ```
+            kubectl create secret tls app1-tls-secret --cert=app1-tls.crt --key=app1-tls.key
+            ```
+          - |
+            ```
+            kubectl create secret tls app2-tls-secret --cert=app2-tls.crt --key=app2-tls.key
+            ```
+          - "Verifique os secrets:"
+          - |
+            ```
+            kubectl get secrets -o wide | grep tls-secret
+            ```
+          - "Crie um arquivo chamado gateway-tls-update.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1beta1
+            kind: Gateway
+            metadata:
+              name: nginx-gateway
+            spec:
+              gatewayClassName: nginx
+              listeners:
+                - name: http
+                  protocol: HTTP
+                  port: 80
+                - name: tls
+                  protocol: TLS
+                  port: 443
+                  tls:
+                    mode: Terminate
+                    certificateRefs:
+                      - name: app1-tls-secret
+            ```
+          - "Explicação:"
+          - "- Mantemos listener HTTP na porta 80"
+          - "- Adicionamos listener TLS na porta 443"
+          - "- mode: Terminate = terminação de TLS no gateway"
+          - "- certificateRefs: certificado padrão para TLS"
+          - "Atualize o Gateway:"
+          - |
+            ```
+            kubectl apply -f gateway-tls-update.yaml
+            ```
+          - "Aguarde a atualização:"
+          - |
+            ```
+            kubectl get gateway -w
+            ```
+          - "Crie um arquivo chamado tls-apps-deploy.yaml:"
+          - |
+            ```
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: secure-app1
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: secure-app1
+              template:
+                metadata:
+                  labels:
+                    app: secure-app1
+                spec:
+                  containers:
+                    - name: app
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Secure App 1 with TLS"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: secure-app1-service
+            spec:
+              selector:
+                app: secure-app1
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: secure-app2
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: secure-app2
+              template:
+                metadata:
+                  labels:
+                    app: secure-app2
+                spec:
+                  containers:
+                    - name: app
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Secure App 2 with TLS"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: secure-app2-service
+            spec:
+              selector:
+                app: secure-app2
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ```
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f tls-apps-deploy.yaml
+            ```
+          - "Crie um arquivo chamado tlsroute-config.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1alpha2
+            kind: TLSRoute
+            metadata:
+              name: secure-route
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: tls
+              hostnames:
+                - "app1.local"
+                - "app2.local"
+              rules:
+                - backendRefs:
+                    - name: secure-app1-service
+                      port: 80
+                    - name: secure-app2-service
+                      port: 80
+            ```
+          - "Nota: TLSRoute suporta apenas um padrão de roteamento por hostnames."
+          - "Para roteamento mais granular, use HTTPRoute com HTTPS/TLS."
+          - "Aplicar mais tarde quando entender melhor TLSRoute com SNI"
+          - "Crie um arquivo chamado httproute-https.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: secure-http-route
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: tls
+              hostnames:
+                - "app1.local"
+                - "app2.local"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/"
+                  backendRefs:
+                    - name: secure-app1-service
+                      port: 80
+                    - name: secure-app2-service
+                      port: 80
+            ```
+          - "Aplicar a configuração:"
+          - |
+            ```
+            kubectl apply -f httproute-https.yaml
+            ```
+          - "Liste os serviços para encontrar a porta 443:"
+          - |
+            ```
+            kubectl get svc -n nginx-gateway -o wide
+            ```
+          - "Teste com curl (ignorando certificado autoassinado):"
+          - |
+            ```
+            curl -k -v https://NODE-IP:443/
+            ```
+          - "Teste com host específico:"
+          - |
+            ```
+            curl -k -H "Host: app1.local" https://NODE-IP:443/
+            ```
+          - |
+            ```
+            curl -k -H "Host: app2.local" https://NODE-IP:443/
+            ```
+          - "Verifique o certificado:"
+          - |
+            ```
+            echo | openssl s_client -servername app1.local -connect NODE-IP:443
+            ```
+          - "Verifique os logs do Nginx Gateway:"
+          - |
+            ```
+            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway --tail=50
+            ```
+          - "Você completou o laboratório TLSRoute com sucesso!"
+
+      - name: "Entender o GRPCRoute"
+        description: "GRPCRoute é um recurso da Gateway API para roteamento de serviços gRPC"
+        steps:
+          - "GRPCRoute é um CRD (Custom Resource Definition) que define como rotear o tráfego gRPC para serviços de backend."
+          - "gRPC é um framework moderno de RPC (Remote Procedure Call) construído sobre HTTP/2."
+          - "Diferentemente de HTTP/REST tradicional, gRPC usa HTTP/2 para comunicação bidirecional eficiente."
+          - "GRPCRoute permite roteamento baseado em:"
+          - "- Nome do serviço gRPC: helloworld.Greeter, userservice.UserAPI, etc"
+          - "- Nome do método: SayHello, GetUser, etc"
+          - "- Headers HTTP/2: metadata customizada"
+          - "GRPCRoute é ideal para:"
+          - "- Microsserviços que usam gRPC"
+          - "- Serviços com comunicação bidirecional"
+          - "- APIs de alta performance"
+          - "- Arquiteturas modernas de microsserviços"
+          - "Documentação oficial: https://gateway-api.sigs.k8s.io/api-types/grpcroute/"
+          - "gRPC usa Protocol Buffers (protobuf) para definir interfaces de serviço."
+          - "Protocol Buffers é um método agnóstico de serialização de dados estruturados."
+          - "Exemplo de arquivo greeter.proto para um serviço Greeter:"
+          - |
+            ```
+            syntax = "proto3";
+            
+            package helloworld;
+            
+            message HelloRequest {
+              string name = 1;
+            }
+            
+            message HelloReply {
+              string message = 1;
+            }
+            
+            service Greeter {
+              rpc SayHello (HelloRequest) returns (HelloReply) {}
+            }
+            ```
+          - "Este arquivo define:"
+          - "- package: helloworld (namespace do serviço)"
+          - "- Mensagens: HelloRequest e HelloReply"
+          - "- Serviço: Greeter com método SayHello"
+          - "gRPC oferece várias vantagens:"
+          - "- HTTP/2 com multiplexação de requisições"
+          - "- Serialização binária (mais eficiente que JSON)"
+          - "- Suporte a streaming bidirecional"
+          - "- Type-safe com geração de código"
+          - "Para este laboratório, usaremos uma imagem Docker com servidor gRPC pré-configurado."
+          - "Gateway pode ter múltiplos listeners para diferentes protocolos."
+          - "Para usar GRPCRoute, precisamos adicionar um listener que suporte HTTP/2."
+          - "Crie um arquivo chamado gateway-grpc-update.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1beta1
+            kind: Gateway
+            metadata:
+              name: nginx-gateway
+            spec:
+              gatewayClassName: nginx
+              listeners:
+                - name: http
+                  protocol: HTTP
+                  port: 80
+                - name: grpc
+                  protocol: HTTP
+                  port: 50051
+            ```
+          - "Explicação:"
+          - "- Mantemos o listener HTTP na porta 80 (HTTP/1.1)"
+          - "- Adicionamos listener HTTP na porta 50051 para gRPC (HTTP/2)"
+          - "- Gateway API detecta HTTP/2 automaticamente em certas portas"
+          - "Atualize o Gateway:"
+          - |
+            ```
+            kubectl apply -f gateway-grpc-update.yaml
+            ```
+          - "Verifique se o Gateway foi atualizado:"
+          - |
+            ```
+            kubectl get gateway nginx-gateway
+            ```
+          - |
+            ```
+            kubectl describe gateway nginx-gateway
+            ```
+          - "Aguarde a configuração ser aplicada:"
+          - |
+            ```
+            kubectl get gateway -w
+            ```
+          - "Para facilitar, usaremos uma imagem Docker pré-compilada com servidor gRPC."
+          - "Você pode usar a imagem grpcjs/grpc-node ou criar sua própria."
+          - "Crie um arquivo chamado grpc-app-deploy.yaml:"
+          - |
+            ```
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: grpc-server-config
+            data:
+              app.js: |
+                const grpc = require('@grpc/grpc-js');
+                const protoLoader = require('@grpc/proto-loader');
+                
+                const packageDefinition = protoLoader.loadSync(
+                  'helloworld.proto',
+                  {keepCase: true, longs: String, enums: String, defaults: true, oneofs: true}
+                );
+                const helloProto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+                
+                function sayHello(call, callback) {
+                  console.log('SayHello called with:', call.request.name);
+                  callback(null, {message: 'Hello ' + call.request.name});
+                }
+                
+                function main() {
+                  const server = new grpc.Server();
+                  server.addService(helloProto.Greeter.service, {sayHello: sayHello});
+                  server.bindAsync('0.0.0.0:50051', grpc.ServerCredentials.createInsecure(), () => {
+                    console.log('Server running at http://0.0.0.0:50051');
+                    server.start();
+                  });
+                }
+                
+                main();
+              helloworld.proto: |
+                syntax = "proto3";
+                
+                package helloworld;
+                
+                message HelloRequest {
+                  string name = 1;
+                }
+                
+                message HelloReply {
+                  string message = 1;
+                }
+                
+                service Greeter {
+                  rpc SayHello (HelloRequest) returns (HelloReply) {}
+                }
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: grpc-greeter-v1
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: grpc-greeter
+                  version: v1
+              template:
+                metadata:
+                  labels:
+                    app: grpc-greeter
+                    version: v1
+                spec:
+                  containers:
+                    - name: grpc-server
+                      image: ghcr.io/grpc/grpc-go:v1.57.0
+                      command: 
+                        - sh
+                        - -c
+                        - "echo 'Running gRPC Greeter Server v1'; sleep infinity"
+                      ports:
+                        - name: grpc
+                          containerPort: 50051
+                          protocol: TCP
+                      resources:
+                        requests:
+                          cpu: 100m
+                          memory: 128Mi
+                        limits:
+                          cpu: 500m
+                          memory: 512Mi
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: grpc-greeter-v1-service
+              labels:
+                app: grpc-greeter
+                version: v1
+            spec:
+              selector:
+                app: grpc-greeter
+                version: v1
+              ports:
+                - name: grpc
+                  protocol: TCP
+                  port: 50051
+                  targetPort: 50051
+              type: ClusterIP
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: grpc-greeter-v2
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: grpc-greeter
+                  version: v2
+              template:
+                metadata:
+                  labels:
+                    app: grpc-greeter
+                    version: v2
+                spec:
+                  containers:
+                    - name: grpc-server
+                      image: ghcr.io/grpc/grpc-go:v1.57.0
+                      command: 
+                        - sh
+                        - -c
+                        - "echo 'Running gRPC Greeter Server v2'; sleep infinity"
+                      ports:
+                        - name: grpc
+                          containerPort: 50051
+                          protocol: TCP
+                      resources:
+                        requests:
+                          cpu: 100m
+                          memory: 128Mi
+                        limits:
+                          cpu: 500m
+                          memory: 512Mi
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: grpc-greeter-v2-service
+              labels:
+                app: grpc-greeter
+                version: v2
+            spec:
+              selector:
+                app: grpc-greeter
+                version: v2
+              ports:
+                - name: grpc
+                  protocol: TCP
+                  port: 50051
+                  targetPort: 50051
+              type: ClusterIP
+            ```
+          - "Explicação:"
+          - "- Criamos 2 Deployments gRPC (v1 e v2) com 2 réplicas cada"
+          - "- Cada um com um Service associado"
+          - "- Porta 50051 é a porta padrão para gRPC"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f grpc-app-deploy.yaml
+            ```
+          - "Verifique os recursos criados:"
+          - |
+            ```
+            kubectl get pods,svc -l app=grpc-greeter
+            ```
+          - "Crie um arquivo chamado grpcroute-service.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: GRPCRoute
+            metadata:
+              name: grpc-greeter-route
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: grpc
+              hostnames:
+                - "localhost"
+              rules:
+                - matches:
+                    - method:
+                        type: Exact
+                        service: helloworld.Greeter
+                        method: SayHello
+                  backendRefs:
+                    - name: grpc-greeter-v1-service
+                      port: 50051
+                      weight: 80
+                    - name: grpc-greeter-v2-service
+                      port: 50051
+                      weight: 20
+            ```
+          - "Explicação:"
+          - "- parentRefs: Referencia o Gateway 'nginx-gateway' com listener 'grpc'"
+          - "- hostnames: Define 'localhost' para este exemplo"
+          - "- matches: Define match por método gRPC exato"
+          - "- service: Nome do serviço gRPC (helloworld.Greeter)"
+          - "- method: Nome do método (SayHello)"
+          - "- backendRefs: Define dois backends com pesos diferentes (80% v1, 20% v2)"
+          - "Aplique a configuração:"
+          - |
+            ```
+            kubectl apply -f grpcroute-service.yaml
+            ```
+          - "Verifique o GRPCRoute:"
+          - |
+            ```
+            kubectl get grpcroute
+            ```
+          - |
+            ```
+            kubectl describe grpcroute grpc-greeter-route
+            ```
+          - "Você pode definir múltiplas regras em um único GRPCRoute para diferentes serviços."
+          - "Crie um arquivo chamado grpcroute-multi-service.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: GRPCRoute
+            metadata:
+              name: grpc-multi-route
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+                  sectionName: grpc
+              hostnames:
+                - "localhost"
+              rules:
+                - matches:
+                    - method:
+                        type: Exact
+                        service: helloworld.Greeter
+                        method: SayHello
+                  backendRefs:
+                    - name: grpc-greeter-v1-service
+                      port: 50051
+                - matches:
+                    - method:
+                        type: Exact
+                        service: helloworld.Greeter
+                        method: SayHelloStream
+                  backendRefs:
+                    - name: grpc-greeter-v2-service
+                      port: 50051
+                - matches:
+                    - method:
+                        type: Exact
+                        service: userapi.UserService
+                        method: GetUser
+                  backendRefs:
+                    - name: grpc-greeter-v1-service
+                      port: 50051
+            ```
+          - "Explicação:"
+          - "- Define 3 regras para diferentes serviços/métodos"
+          - "- SayHello -> v1"
+          - "- SayHelloStream -> v2"
+          - "- GetUser -> v1"
+          - "- Permite roteamento granular por método gRPC"
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f grpcroute-multi-service.yaml
+            ```
+          - "Para testar gRPC, usaremos grpcurl, um cliente gRPC em linha de comando."
+          - "Primeiro, obtenha informações do Gateway:"
+          - |
+            ```
+            kubectl get svc -n nginx-gateway -o wide
+            ```
+          - "Anote o NODE-IP e a porta 50051."
+          - "Teste com grpcurl (dentro de um pod):"
+          - |
+            ```
+            kubectl run -it --rm grpc-test --image=fullstorydev/grpcurl --restart=Never -- \
+            -plaintext \
+            -d '{"name":"World"}' \
+            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
+            helloworld.Greeter/SayHello
+            ```
+          - "Você deve ver uma resposta do servidor gRPC."
+          - "Teste múltiplas vezes para observar o load balancing entre v1 e v2:"
+          - |
+            ```
+            for i in {1..10}; do \
+            kubectl run -it --rm grpc-test-$i --image=fullstorydev/grpcurl --restart=Never -- \
+            -plaintext \
+            -d '{"name":"Test'$i'"}' \
+            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
+            helloworld.Greeter/SayHello; \
+            done
+            ```
+          - "Liste os serviços gRPC disponíveis:"
+          - |
+            ```
+            kubectl run -it --rm grpc-list --image=fullstorydev/grpcurl --restart=Never -- \
+            -plaintext \
+            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
+            list
+            ```
+          - "Descreva os serviços gRPC:"
+          - |
+            ```
+            kubectl run -it --rm grpc-desc --image=fullstorydev/grpcurl --restart=Never -- \
+            -plaintext \
+            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
+            describe helloworld.Greeter
+            ```
+          - "Você completou o laboratório GRPCRoute com sucesso!"
+
+      - name: "Entender o HTTPRoute for Mesh"
+        description: "HTTPRoute com roteamento avançado para microsserviços"
+        steps:
+          - "HTTPRoute for Mesh refere-se ao uso de HTTPRoute em arquiteturas de microsserviços complexas."
+          - "Não é um tipo separado, mas sim HTTPRoute configurado para cenários mesh/service."
+          - "Recursos avançados de HTTPRoute para mesh:"
+          - "- Roteamento por múltiplos critérios (path + header + method)"
+          - "- Load balancing com pesos entre versões"
+          - "- Canary deployments"
+          - "- Traffic splitting"
+          - "- Circuit breakers e timeouts"
+          - "- Rate limiting"
+          - "HTTPRoute é fundamental para:"
+          - "- Ingress control com roteamento inteligente"
+          - "- Canary deployments"
+          - "- A/B testing"
+          - "- Traffic management"
+          - "- API gateways"
+          - "Documentação: https://gateway-api.sigs.k8s.io/guides/traffic-splitting/"
+          - "Para simular uma malha de microsserviços, criaremos vários serviços com diferentes versões."
+          - "Crie um arquivo chamado mesh-services-deploy.yaml:"
+          - |
+            ```
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: api-users-v1
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: api-users
+                  version: v1
+              template:
+                metadata:
+                  labels:
+                    app: api-users
+                    version: v1
+                spec:
+                  containers:
+                    - name: api
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Users API v1 - Stable Version"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: api-users-v1-service
+              labels:
+                app: api-users
+                version: v1
+            spec:
+              selector:
+                app: api-users
+                version: v1
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: api-users-v2
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: api-users
+                  version: v2
+              template:
+                metadata:
+                  labels:
+                    app: api-users
+                    version: v2
+                spec:
+                  containers:
+                    - name: api
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Users API v2 - Beta with New Features"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: api-users-v2-service
+              labels:
+                app: api-users
+                version: v2
+            spec:
+              selector:
+                app: api-users
+                version: v2
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: api-orders-v1
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: api-orders
+                  version: v1
+              template:
+                metadata:
+                  labels:
+                    app: api-orders
+                    version: v1
+                spec:
+                  containers:
+                    - name: api
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Orders API v1 - Stable"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: api-orders-v1-service
+              labels:
+                app: api-orders
+                version: v1
+            spec:
+              selector:
+                app: api-orders
+                version: v1
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: api-orders-v2
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: api-orders
+                  version: v2
+              template:
+                metadata:
+                  labels:
+                    app: api-orders
+                    version: v2
+                spec:
+                  containers:
+                    - name: api
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Orders API v2 - With Payment Integration"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: api-orders-v2-service
+              labels:
+                app: api-orders
+                version: v2
+            spec:
+              selector:
+                app: api-orders
+                version: v2
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: api-products
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: api-products
+              template:
+                metadata:
+                  labels:
+                    app: api-products
+                spec:
+                  containers:
+                    - name: api
+                      image: hashicorp/http-echo
+                      args:
+                        - "-text=Products API - Catalog Service"
+                      ports:
+                        - containerPort: 5678
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: api-products-service
+              labels:
+                app: api-products
+            spec:
+              selector:
+                app: api-products
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 5678
+            ```
+          - "Explicação:"
+          - "- Criamos 5 Deployments representando microsserviços"
+          - "- Users API v1 (estável) e v2 (beta)"
+          - "- Orders API v1 (estável) e v2 (novo)"
+          - "- Products API (única versão)"
+          - "- Cada um com 2 réplicas e seu Service"
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f mesh-services-deploy.yaml
+            ```
+          - "Verifique os recursos:"
+          - |
+            ```
+            kubectl get pods,svc -l app
+            ```
+          - "Crie um arquivo chamado httproute-mesh-path.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: mesh-route-by-path
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "api.example.com"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                  backendRefs:
+                    - name: api-users-v1-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/orders"
+                  backendRefs:
+                    - name: api-orders-v1-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/products"
+                  backendRefs:
+                    - name: api-products-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- /users -> api-users-v1-service"
+          - "- /orders -> api-orders-v1-service"
+          - "- /products -> api-products-service"
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f httproute-mesh-path.yaml
+            ```
+          - "Crie um arquivo chamado httproute-mesh-canary.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: mesh-route-canary
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "api-canary.example.com"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                  backendRefs:
+                    - name: api-users-v1-service
+                      port: 80
+                      weight: 90
+                    - name: api-users-v2-service
+                      port: 80
+                      weight: 10
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/orders"
+                  backendRefs:
+                    - name: api-orders-v1-service
+                      port: 80
+                      weight: 80
+                    - name: api-orders-v2-service
+                      port: 80
+                      weight: 20
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/products"
+                  backendRefs:
+                    - name: api-products-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- Users API: 90% v1 (estável), 10% v2 (teste)"
+          - "- Orders API: 80% v1 (estável), 20% v2 (teste maior)"
+          - "- Products API: 100% versão atual"
+          - "- Permite testar novas versões com tráfego real controlado"
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f httproute-mesh-canary.yaml
+            ```
+          - "Crie um arquivo chamado httproute-mesh-header.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: mesh-route-header
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "api-beta.example.com"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                      headers:
+                        - name: "X-Client-Type"
+                          value: "internal"
+                  backendRefs:
+                    - name: api-users-v2-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                      headers:
+                        - name: "X-Beta-Tester"
+                          value: "true"
+                  backendRefs:
+                    - name: api-users-v2-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                  backendRefs:
+                    - name: api-users-v1-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/orders"
+                      headers:
+                        - name: "X-Client-Type"
+                          value: "internal"
+                  backendRefs:
+                    - name: api-orders-v2-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/orders"
+                  backendRefs:
+                    - name: api-orders-v1-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- Se X-Client-Type=internal -> nova versão (v2)"
+          - "- Se X-Beta-Tester=true -> nova versão (v2)"
+          - "- Default -> versão estável (v1)"
+          - "- Permite testers específicos usar versão beta"
+          - "- Útil para A/B testing e feature flags"
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f httproute-mesh-header.yaml
+            ```
+          - "Crie um arquivo chamado httproute-mesh-method.yaml:"
+          - |
+            ```
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: mesh-route-method
+            spec:
+              parentRefs:
+                - name: nginx-gateway
+              hostnames:
+                - "api-method.example.com"
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                      method: GET
+                  backendRefs:
+                    - name: api-users-v1-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                      method: POST
+                  backendRefs:
+                    - name: api-users-v2-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                      method: PUT
+                  backendRefs:
+                    - name: api-users-v2-service
+                      port: 80
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: "/users"
+                      method: DELETE
+                  backendRefs:
+                    - name: api-users-v1-service
+                      port: 80
+            ```
+          - "Explicação:"
+          - "- GET (leitura) -> v1 (estável)"
+          - "- POST (criação) -> v2 (novo)"
+          - "- PUT (atualização) -> v2 (novo)"
+          - "- DELETE (deleção) -> v1 (seguro)"
+          - "- Permite testar operações específicas"
+          - "Aplique:"
+          - |
+            ```
+            kubectl apply -f httproute-mesh-method.yaml
+            ```
+          - "Teste roteamento por path:"
+          - |
+            ```
+            curl -H "Host: api.example.com" http://NODE-IP:80/users
+            ```
+          - |
+            ```
+            curl -H "Host: api.example.com" http://NODE-IP:80/orders
+            ```
+          - |
+            ```
+            curl -H "Host: api.example.com" http://NODE-IP:80/products
+            ```
+          - "Teste canary deployment (execute múltiplas vezes):"
+          - |
+            ```
+            for i in {1..20}; do \
+            curl -s -H "Host: api-canary.example.com" http://NODE-IP:80/users | grep -o "v[12]"; \
+            done | sort | uniq -c
+            ```
+          - "Deve mostrar ~18 v1 e ~2 v2 (90% vs 10%)"
+          - "Teste roteamento por header:"
+          - |
+            ```
+            curl -H "Host: api-beta.example.com" -H "X-Client-Type: internal" http://NODE-IP:80/users
+            ```
+          - |
+            ```
+            curl -H "Host: api-beta.example.com" -H "X-Beta-Tester: true" http://NODE-IP:80/users
+            ```
+          - |
+            ```
+            curl -H "Host: api-beta.example.com" http://NODE-IP:80/users
+            ```
+          - "Teste roteamento por método:"
+          - |
+            ```
+            curl -X GET -H "Host: api-method.example.com" http://NODE-IP:80/users
+            ```
+          - |
+            ```
+            curl -X POST -H "Host: api-method.example.com" http://NODE-IP:80/users
+            ```
+          - "Verifique os logs do gateway:"
+          - |
+            ```
+            kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway --tail=100 -f
+            ```
+          - "Verifique quais backends recebem requisições:"
+          - |
+            ```
+            kubectl logs -l app=api-users --tail=20
+            ```
+          - "Você completou o laboratório HTTPRoute for Mesh com sucesso!"
