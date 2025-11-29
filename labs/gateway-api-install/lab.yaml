@@ -572,412 +572,6 @@ data:
           - "- https://github.com/nginx/nginx-gateway-fabric/tree/main/examples"
           - "Você completou este laboratório com sucesso!"
 
-      - name: "Entender o GRPCRoute"
-        description: "GRPCRoute é um recurso da Gateway API para roteamento de serviços gRPC"
-        steps:
-          - "GRPCRoute é um CRD (Custom Resource Definition) que define como rotear o tráfego gRPC para serviços de backend."
-          - "gRPC é um framework moderno de RPC (Remote Procedure Call) construído sobre HTTP/2."
-          - "Diferentemente de HTTP/REST tradicional, gRPC usa HTTP/2 para comunicação bidirecional eficiente."
-          - "GRPCRoute permite roteamento baseado em:"
-          - "- Nome do serviço gRPC: helloworld.Greeter, userservice.UserAPI, etc"
-          - "- Nome do método: SayHello, GetUser, etc"
-          - "- Headers HTTP/2: metadata customizada"
-          - "GRPCRoute é ideal para:"
-          - "- Microsserviços que usam gRPC"
-          - "- Serviços com comunicação bidirecional"
-          - "- APIs de alta performance"
-          - "- Arquiteturas modernas de microsserviços"
-          - "Documentação oficial: https://gateway-api.sigs.k8s.io/api-types/grpcroute/"
-          - "gRPC usa Protocol Buffers (protobuf) para definir interfaces de serviço."
-          - "Protocol Buffers é um método agnóstico de serialização de dados estruturados."
-          - "Exemplo de arquivo greeter.proto para um serviço Greeter:"
-          - |
-            ```
-            syntax = "proto3";
-            
-            package helloworld;
-            
-            message HelloRequest {
-              string name = 1;
-            }
-            
-            message HelloReply {
-              string message = 1;
-            }
-            
-            service Greeter {
-              rpc SayHello (HelloRequest) returns (HelloReply) {}
-            }
-            ```
-          - "Este arquivo define:"
-          - "- package: helloworld (namespace do serviço)"
-          - "- Mensagens: HelloRequest e HelloReply"
-          - "- Serviço: Greeter com método SayHello"
-          - "gRPC oferece várias vantagens:"
-          - "- HTTP/2 com multiplexação de requisições"
-          - "- Serialização binária (mais eficiente que JSON)"
-          - "- Suporte a streaming bidirecional"
-          - "- Type-safe com geração de código"
-          - "Para este laboratório, usaremos uma imagem Docker com servidor gRPC pré-configurado."
-          - "Gateway pode ter múltiplos listeners para diferentes protocolos."
-          - "Para usar GRPCRoute, precisamos adicionar um listener que suporte HTTP/2."
-          - "Crie um arquivo chamado gateway-grpc-update.yaml:"
-          - |
-            ```
-            apiVersion: gateway.networking.k8s.io/v1beta1
-            kind: Gateway
-            metadata:
-              name: nginx-gateway
-            spec:
-              gatewayClassName: nginx
-              listeners:
-                - name: http
-                  protocol: HTTP
-                  port: 80
-                - name: grpc
-                  protocol: HTTP
-                  port: 50051
-            ```
-          - "Explicação:"
-          - "- Mantemos o listener HTTP na porta 80 (HTTP/1.1)"
-          - "- Adicionamos listener HTTP na porta 50051 para gRPC (HTTP/2)"
-          - "- Gateway API detecta HTTP/2 automaticamente em certas portas"
-          - "Atualize o Gateway:"
-          - |
-            ```
-            kubectl apply -f gateway-grpc-update.yaml
-            ```
-          - "Verifique se o Gateway foi atualizado:"
-          - |
-            ```
-            kubectl get gateway nginx-gateway
-            ```
-          - |
-            ```
-            kubectl describe gateway nginx-gateway
-            ```
-          - "Aguarde a configuração ser aplicada:"
-          - |
-            ```
-            kubectl get gateway -w
-            ```
-          - "Para facilitar, usaremos uma imagem Docker pré-compilada com servidor gRPC."
-          - "Você pode usar a imagem grpcjs/grpc-node ou criar sua própria."
-          - "Crie um arquivo chamado grpc-app-deploy.yaml:"
-          - |
-            ```
-            apiVersion: v1
-            kind: ConfigMap
-            metadata:
-              name: grpc-server-config
-            data:
-              app.js: |
-                const grpc = require('@grpc/grpc-js');
-                const protoLoader = require('@grpc/proto-loader');
-                
-                const packageDefinition = protoLoader.loadSync(
-                  'helloworld.proto',
-                  {keepCase: true, longs: String, enums: String, defaults: true, oneofs: true}
-                );
-                const helloProto = grpc.loadPackageDefinition(packageDefinition).helloworld;
-                
-                function sayHello(call, callback) {
-                  console.log('SayHello called with:', call.request.name);
-                  callback(null, {message: 'Hello ' + call.request.name});
-                }
-                
-                function main() {
-                  const server = new grpc.Server();
-                  server.addService(helloProto.Greeter.service, {sayHello: sayHello});
-                  server.bindAsync('0.0.0.0:50051', grpc.ServerCredentials.createInsecure(), () => {
-                    console.log('Server running at http://0.0.0.0:50051');
-                    server.start();
-                  });
-                }
-                
-                main();
-              helloworld.proto: |
-                syntax = "proto3";
-                
-                package helloworld;
-                
-                message HelloRequest {
-                  string name = 1;
-                }
-                
-                message HelloReply {
-                  string message = 1;
-                }
-                
-                service Greeter {
-                  rpc SayHello (HelloRequest) returns (HelloReply) {}
-                }
-            ---
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: grpc-greeter-v1
-            spec:
-              replicas: 2
-              selector:
-                matchLabels:
-                  app: grpc-greeter
-                  version: v1
-              template:
-                metadata:
-                  labels:
-                    app: grpc-greeter
-                    version: v1
-                spec:
-                  containers:
-                    - name: grpc-server
-                      image: ghcr.io/grpc/grpc-go:v1.57.0
-                      command: 
-                        - sh
-                        - -c
-                        - "echo 'Running gRPC Greeter Server v1'; sleep infinity"
-                      ports:
-                        - name: grpc
-                          containerPort: 50051
-                          protocol: TCP
-                      resources:
-                        requests:
-                          cpu: 100m
-                          memory: 128Mi
-                        limits:
-                          cpu: 500m
-                          memory: 512Mi
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: grpc-greeter-v1-service
-              labels:
-                app: grpc-greeter
-                version: v1
-            spec:
-              selector:
-                app: grpc-greeter
-                version: v1
-              ports:
-                - name: grpc
-                  protocol: TCP
-                  port: 50051
-                  targetPort: 50051
-              type: ClusterIP
-            ---
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: grpc-greeter-v2
-            spec:
-              replicas: 2
-              selector:
-                matchLabels:
-                  app: grpc-greeter
-                  version: v2
-              template:
-                metadata:
-                  labels:
-                    app: grpc-greeter
-                    version: v2
-                spec:
-                  containers:
-                    - name: grpc-server
-                      image: ghcr.io/grpc/grpc-go:v1.57.0
-                      command: 
-                        - sh
-                        - -c
-                        - "echo 'Running gRPC Greeter Server v2'; sleep infinity"
-                      ports:
-                        - name: grpc
-                          containerPort: 50051
-                          protocol: TCP
-                      resources:
-                        requests:
-                          cpu: 100m
-                          memory: 128Mi
-                        limits:
-                          cpu: 500m
-                          memory: 512Mi
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: grpc-greeter-v2-service
-              labels:
-                app: grpc-greeter
-                version: v2
-            spec:
-              selector:
-                app: grpc-greeter
-                version: v2
-              ports:
-                - name: grpc
-                  protocol: TCP
-                  port: 50051
-                  targetPort: 50051
-              type: ClusterIP
-            ```
-          - "Explicação:"
-          - "- Criamos 2 Deployments gRPC (v1 e v2) com 2 réplicas cada"
-          - "- Cada um com um Service associado"
-          - "- Porta 50051 é a porta padrão para gRPC"
-          - "Aplique a configuração:"
-          - |
-            ```
-            kubectl apply -f grpc-app-deploy.yaml
-            ```
-          - "Verifique os recursos criados:"
-          - |
-            ```
-            kubectl get pods,svc -l app=grpc-greeter
-            ```
-          - "Crie um arquivo chamado grpcroute-service.yaml:"
-          - |
-            ```
-            apiVersion: gateway.networking.k8s.io/v1
-            kind: GRPCRoute
-            metadata:
-              name: grpc-greeter-route
-            spec:
-              parentRefs:
-                - name: nginx-gateway
-                  sectionName: grpc
-              hostnames:
-                - "localhost"
-              rules:
-                - matches:
-                    - method:
-                        type: Exact
-                        service: helloworld.Greeter
-                        method: SayHello
-                  backendRefs:
-                    - name: grpc-greeter-v1-service
-                      port: 50051
-                      weight: 80
-                    - name: grpc-greeter-v2-service
-                      port: 50051
-                      weight: 20
-            ```
-          - "Explicação:"
-          - "- parentRefs: Referencia o Gateway 'nginx-gateway' com listener 'grpc'"
-          - "- hostnames: Define 'localhost' para este exemplo"
-          - "- matches: Define match por método gRPC exato"
-          - "- service: Nome do serviço gRPC (helloworld.Greeter)"
-          - "- method: Nome do método (SayHello)"
-          - "- backendRefs: Define dois backends com pesos diferentes (80% v1, 20% v2)"
-          - "Aplique a configuração:"
-          - |
-            ```
-            kubectl apply -f grpcroute-service.yaml
-            ```
-          - "Verifique o GRPCRoute:"
-          - |
-            ```
-            kubectl get grpcroute
-            ```
-          - |
-            ```
-            kubectl describe grpcroute grpc-greeter-route
-            ```
-          - "Você pode definir múltiplas regras em um único GRPCRoute para diferentes serviços."
-          - "Crie um arquivo chamado grpcroute-multi-service.yaml:"
-          - |
-            ```
-            apiVersion: gateway.networking.k8s.io/v1
-            kind: GRPCRoute
-            metadata:
-              name: grpc-multi-route
-            spec:
-              parentRefs:
-                - name: nginx-gateway
-                  sectionName: grpc
-              hostnames:
-                - "localhost"
-              rules:
-                - matches:
-                    - method:
-                        type: Exact
-                        service: helloworld.Greeter
-                        method: SayHello
-                  backendRefs:
-                    - name: grpc-greeter-v1-service
-                      port: 50051
-                - matches:
-                    - method:
-                        type: Exact
-                        service: helloworld.Greeter
-                        method: SayHelloStream
-                  backendRefs:
-                    - name: grpc-greeter-v2-service
-                      port: 50051
-                - matches:
-                    - method:
-                        type: Exact
-                        service: userapi.UserService
-                        method: GetUser
-                  backendRefs:
-                    - name: grpc-greeter-v1-service
-                      port: 50051
-            ```
-          - "Explicação:"
-          - "- Define 3 regras para diferentes serviços/métodos"
-          - "- SayHello -> v1"
-          - "- SayHelloStream -> v2"
-          - "- GetUser -> v1"
-          - "- Permite roteamento granular por método gRPC"
-          - "Aplique:"
-          - |
-            ```
-            kubectl apply -f grpcroute-multi-service.yaml
-            ```
-          - "Para testar gRPC, usaremos grpcurl, um cliente gRPC em linha de comando."
-          - "Primeiro, obtenha informações do Gateway:"
-          - |
-            ```
-            kubectl get svc -n nginx-gateway -o wide
-            ```
-          - "Anote o $GATEWAY_IP e a porta 50051."
-          - "Teste com grpcurl (dentro de um pod):"
-          - |
-            ```
-            kubectl run -it --rm grpc-test --image=fullstorydev/grpcurl --restart=Never -- \
-            -plaintext \
-            -d '{"name":"World"}' \
-            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
-            helloworld.Greeter/SayHello
-            ```
-          - "Você deve ver uma resposta do servidor gRPC."
-          - "Teste múltiplas vezes para observar o load balancing entre v1 e v2:"
-          - |
-            ```
-            for i in {1..10}; do \
-            kubectl run -it --rm grpc-test-$i --image=fullstorydev/grpcurl --restart=Never -- \
-            -plaintext \
-            -d '{"name":"Test'$i'"}' \
-            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
-            helloworld.Greeter/SayHello; \
-            done
-            ```
-          - "Liste os serviços gRPC disponíveis:"
-          - |
-            ```
-            kubectl run -it --rm grpc-list --image=fullstorydev/grpcurl --restart=Never -- \
-            -plaintext \
-            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
-            list
-            ```
-          - "Descreva os serviços gRPC:"
-          - |
-            ```
-            kubectl run -it --rm grpc-desc --image=fullstorydev/grpcurl --restart=Never -- \
-            -plaintext \
-            nginx-gateway-nginx.nginx-gateway.svc.cluster.local:50051 \
-            describe helloworld.Greeter
-            ```
-          - "Você completou o laboratório GRPCRoute com sucesso!"
-
       - name: "Entender o HTTPRoute for Mesh"
         description: "HTTPRoute com roteamento avançado para microsserviços"
         steps:
@@ -998,7 +592,7 @@ data:
           - "- API gateways"
           - "Documentação: https://gateway-api.sigs.k8s.io/guides/traffic-splitting/"
           - "Para simular uma malha de microsserviços, criaremos vários serviços com diferentes versões."
-          - "Crie um arquivo chamado mesh-services-deploy.yaml:"
+          - "Crie um arquivo chamado 'mesh-services-deploy.yaml'."
           - |
             ```
             apiVersion: apps/v1
@@ -1211,9 +805,9 @@ data:
           - "Verifique os recursos:"
           - |
             ```
-            kubectl get pods,svc -l app
+            kubectl get pods,svc -l app -n lab-test-user
             ```
-          - "Crie um arquivo chamado httproute-mesh-path.yaml:"
+          - "Crie um arquivo chamado 'httproute-mesh-path.yaml'."
           - |
             ```
             apiVersion: gateway.networking.k8s.io/v1
@@ -1252,12 +846,12 @@ data:
           - "- /users -> api-users-v1-service"
           - "- /orders -> api-orders-v1-service"
           - "- /products -> api-products-service"
-          - "Aplique:"
+          - "Aplique a configuração:"
           - |
             ```
             kubectl apply -f httproute-mesh-path.yaml
             ```
-          - "Crie um arquivo chamado httproute-mesh-canary.yaml:"
+          - "Crie um arquivo chamado 'httproute-mesh-canary.yaml'."
           - |
             ```
             apiVersion: gateway.networking.k8s.io/v1
@@ -1305,12 +899,12 @@ data:
           - "- Orders API: 80% v1 (estável), 20% v2 (teste maior)"
           - "- Products API: 100% versão atual"
           - "- Permite testar novas versões com tráfego real controlado"
-          - "Aplique:"
+          - "Aplique a configuração:"
           - |
             ```
             kubectl apply -f httproute-mesh-canary.yaml
             ```
-          - "Crie um arquivo chamado httproute-mesh-header.yaml:"
+          - "Crie um arquivo chamado 'httproute-mesh-header.yaml'."
           - |
             ```
             apiVersion: gateway.networking.k8s.io/v1
@@ -1374,12 +968,12 @@ data:
           - "- Default -> versão estável (v1)"
           - "- Permite testers específicos usar versão beta"
           - "- Útil para A/B testing e feature flags"
-          - "Aplique:"
+          - "Aplique a configuração:"
           - |
             ```
             kubectl apply -f httproute-mesh-header.yaml
             ```
-          - "Crie um arquivo chamado httproute-mesh-method.yaml:"
+          - "Crie um arquivo chamado 'httproute-mesh-method.yaml'."
           - |
             ```
             apiVersion: gateway.networking.k8s.io/v1
@@ -1431,10 +1025,23 @@ data:
           - "- PUT (atualização) -> v2 (novo)"
           - "- DELETE (deleção) -> v1 (seguro)"
           - "- Permite testar operações específicas"
-          - "Aplique:"
+          - "Aplique a configuração:"
           - |
             ```
             kubectl apply -f httproute-mesh-method.yaml
+            ```
+          - "Verifique todas as HTTPRoutes criadas:"
+          - |
+            ```
+            kubectl get httproute -n lab-test-user
+            ```
+          - "Observe as descrições detalhadas de cada HTTPRoute:"
+          - |
+            ```
+            kubectl describe httproute mesh-route-by-path -n lab-test-user
+            kubectl describe httproute mesh-route-canary -n lab-test-user
+            kubectl describe httproute mesh-route-header -n lab-test-user
+            kubectl describe httproute mesh-route-method -n lab-test-user
             ```
           - "Teste roteamento por path:"
           - |
@@ -1456,7 +1063,7 @@ data:
             curl -s -H "Host: api-canary.example.com" http://$GATEWAY_IP:80/users | grep -o "v[12]"; \
             done | sort | uniq -c
             ```
-          - "Deve mostrar ~18 v1 e ~2 v2 (90% vs 10%)"
+          - "Deve mostrar aproximadamente ~18 v1 e ~2 v2 (90% vs 10%)"
           - "Teste roteamento por header:"
           - |
             ```
