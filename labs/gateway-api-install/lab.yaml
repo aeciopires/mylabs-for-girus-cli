@@ -22,26 +22,26 @@ data:
           - "- https://blog.aeciopires.com/conhecendo-o-kubernetes-gateway-api/"
           - "- https://blog.aeciopires.com/aprendendo-kubernetes-gateway-api-na-pratica-com-o-girus-cli/"
           - "O Gateway API é uma especificação para gerenciar gateways de rede no Kubernetes."
-          - "Existem várias implementações de Gateway API, e neste laboratório, usaremos o Nginx Gateway Fabric como nosso controlador de gateway (GatewayController)."
-          - "Os outros softwares que implementam o GatewayController e podem ser encontrados em: https://gateway-api.sigs.k8s.io/implementations/"
+          - "Existem várias implementações da Gateway API e, neste laboratório, usaremos o Nginx Gateway Fabric como nosso controlador de gateway (GatewayController)."
+          - "Os outros softwares que implementam o GatewayController podem ser encontrados em: https://gateway-api.sigs.k8s.io/implementations/"
           - "Os links abaixo fornecem mais informações sobre o Nginx Gateway Fabric:"
           - "- Tabela de compatibilidade dos CRDs: https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/"
           - "- Tabela de versões: https://github.com/nginx/nginx-gateway-fabric/tree/main?tab=readme-ov-file#technical-specifications"
-          - "- Especificações do Gateway API: https://gateway-api.sigs.k8s.io/implementations/v1.4/"
+          - "- Especificações do Gateway API: https://gateway-api.sigs.k8s.io/implementations/"
           - "- Documentação do Kubernetes Gateway API: https://gateway-api.sigs.k8s.io/"
           - "- Documentação do Nginx Gateway Fabric: https://docs.nginx.com/nginx-gateway-fabric/"
           - "Os Custom Resource Definitions (CRDs) estendem a API do Kubernetes, permitindo que o Nginx Gateway Fabric funcione corretamente."
           - "O Gateway API define vários CRDs, como GatewayClass, Gateway, HTTPRoute, TCPRoute, entre outros."
           - "A instalação dos CRDs é o primeiro passo para configurar um gateway no Kubernetes."
           - "Instale os CRDs padrão da Gateway API fornecidos pelo Nginx Gateway Fabric."
-          - "A versão edge disponível na branch 'main' é compatível com a versão 'v1.4' da Gateway API."
+          - "A versão 2.9.0 do NGINX Gateway Fabric, usada neste laboratório, é compatível com a versão 'v1.7.0' da Gateway API e com o Kubernetes 1.32 ou superior."
           - |
             ```
-            kubectl kustomize https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.1 | kubectl apply -f -
+            kubectl kustomize https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.9.0 | kubectl apply -f -
             ```
           - |
             ```
-            kubectl apply --server-side -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/crds.yaml
+            kubectl apply --server-side -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.9.0/deploy/crds.yaml
             ```
           - "Verifique se os CRDs foram instalados corretamente com o seguinte comando."
           - |
@@ -49,6 +49,10 @@ data:
             kubectl get crds | grep gateway
             ```
 
+        validation:
+          - command: "kubectl get crd gateways.gateway.networking.k8s.io httproutes.gateway.networking.k8s.io -o name | wc -l"
+            expectedOutput: "2"
+            errorMessage: "Os CRDs da Gateway API não foram encontrados. Execute novamente os comandos de instalação dos CRDs."
       - name: "Instalar o Nginx Gateway Controller"
         description: "Agora que os CRDs da Gateway API estão instalados, vamos instalar o Nginx Gateway Fabric."
         steps:
@@ -56,9 +60,9 @@ data:
           - "Instale-o no modo NodePort usando o seguinte comando."
           - |
             ```
-            kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.2.1/deploy/nodeport/deploy.yaml
+            kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.9.0/deploy/nodeport/deploy.yaml
             ```
-          - "Verifique os objetos criados no namespace do 'nginx-gateway'."
+          - "Verifique os objetos criados no namespace 'nginx-gateway'."
           - |
             ```
             kubectl get all -n nginx-gateway
@@ -69,13 +73,13 @@ data:
             kubectl describe deployment nginx-gateway -n nginx-gateway
             ```
           - "Observe na seção Args que o controller está sendo configurado para criar a 'gatewayclass=nginx'. Falaremos sobre ela mais adiante."
-          - "Verifique os pods no namespace do 'nginx-gateway' para garantir que o GatewayController está em execução."
+          - "Verifique os pods no namespace 'nginx-gateway' para garantir que o GatewayController está em execução."
           - |
             ```
             kubectl get pods -n nginx-gateway
             ```
           - "Você deve ver os pods do Nginx Gateway em estado 'Running'."
-          - "Verifique os logs para garantir que não há erros."
+          - "Verifique os logs para garantir que não haja erros."
           - |
             ```
             kubectl logs -l app.kubernetes.io/name=nginx-gateway -n nginx-gateway 
@@ -85,10 +89,14 @@ data:
           - "- Usando o helm:"
           - "  - https://docs.nginx.com/nginx-gateway-fabric/install/helm/"
           - "  - https://artifacthub.io/packages/helm/nginx-gateway-fabric/nginx-gateway-fabric"
-          - "Na página a seguir você encontra mais detalhes sobre o Nginx Gateway Fabric e sobre como fazer o troubleshooting:"
+          - "Nas páginas a seguir, você encontra mais detalhes sobre o Nginx Gateway Fabric e sobre como fazer o troubleshooting:"
           - "- https://docs.nginx.com/nginx-gateway-fabric/troubleshooting/"
           - "- https://github.com/nginx/nginx-gateway-fabric/"
 
+        validation:
+          - command: "kubectl get deployment nginx-gateway -n nginx-gateway -o jsonpath='{.status.readyReplicas}'"
+            expectedOutput: "1"
+            errorMessage: "O deployment 'nginx-gateway' não está pronto no namespace 'nginx-gateway'. Verifique a instalação e os logs do controller."
       - name: "Criando o Gateway"
         description: "Agora que o Nginx Gateway Fabric está instalado, vamos criar um gateway simples."
         steps:
@@ -110,7 +118,7 @@ data:
           - "Adicione o seguinte conteúdo ao arquivo."
           - |
             ```
-            apiVersion: gateway.networking.k8s.io/v1beta1
+            apiVersion: gateway.networking.k8s.io/v1
             kind: Gateway
             metadata:
               name: nginx-gateway
@@ -122,7 +130,7 @@ data:
                   port: 80
             ```
           - "Explicação:"
-          - "- 'gatewayClassName': Define que estamos utilizando a classe de gateway do 'nginx', criado no exercício anterior."
+          - "- 'gatewayClassName': Define que estamos utilizando a classe de gateway 'nginx', criada no exercício anterior."
           - "- 'listeners': Configura um listener na porta 80 para receber o tráfego HTTP."
           - "Você pode obter mais informações sobre o recurso Gateway com os comandos abaixo:"
           - |
@@ -141,22 +149,22 @@ data:
             ```
             kubectl get gateways
             ```
-          - "Se na coluna PROGRAMED estiver como True, a configuração funcionou."
+          - "Se a coluna PROGRAMMED estiver como True, a configuração funcionou."
           - "Veja mais detalhes do Gateway criado."
           - |
             ```
             kubectl describe gateway nginx-gateway
             ```
-          - "Essa ação também cria os objetos: service, deployment, pod e replicaset do GatewayController no namespace 'nginx-gateway'. Verifique os recursos criados com o comando abaixo."
+          - "Essa ação também cria os objetos service, deployment, pod e replicaset do Gateway no mesmo namespace do Gateway ('lab-test-user'). Verifique os recursos criados com o comando abaixo."
           - |
             ```
             kubectl get all -n nginx-gateway
             ```
           - "Esse gateway faz uso do GatewayClass 'nginx'."         
           - "GatewayClass define a implementação do controlador de gateway (neste caso, é o Nginx Gateway Fabric)."
-          - "A configuração do GatewayClass 'nginx' é definida a nível de cluster."
+          - "A configuração do GatewayClass 'nginx' é definida em nível de cluster."
           - "O GatewayClass 'nginx' foi criado durante a instalação do Nginx Gateway Fabric."
-          - "Verifique o criação do objeto GatewayClass 'nginx'."
+          - "Verifique a criação do objeto GatewayClass 'nginx'."
           - |
             ```
             kubectl get gatewayclass
@@ -168,7 +176,7 @@ data:
             ```
           - "Os Gateways são CRDs namespace-scoped, ou seja, são criados dentro de um namespace específico e fazem uso do GatewayClass."
           - "Neste caso, o Gateway 'nginx-gateway' foi criado no namespace padrão deste laboratório: 'lab-test-user'."
-          - "Você pode usar o comando abaixo para verificar que foi criado um deployment chamado 'nginx-gateway-nginx' no namespace 'lab-test-user'. Esse deployment é uma a instância do CRD Gateway criado anteriormente."
+          - "Você pode usar o comando abaixo para verificar que foi criado um deployment chamado 'nginx-gateway-nginx' no namespace 'lab-test-user'. Esse deployment é uma instância do CRD Gateway criado anteriormente."
           - |
             ```
             kubectl get deployments -n lab-test-user
@@ -194,7 +202,7 @@ data:
             ```
             kubectl get service -n lab-test-user
             ```
-          - "Na coluna ClusterIP, observe o IP do serviço 'nginx-gateway-nginx', que é do tipo NodePort e também as portas na coluna protocolos."
+          - "Na coluna CLUSTER-IP, observe o IP do serviço 'nginx-gateway-nginx', que é do tipo NodePort, e as portas na coluna PORT(S)."
           - "Isso significa que o gateway está pronto para receber tráfego HTTP na porta 80."
           - "Se você perceber, é o mesmo IP do 'nginx-gateway' mostrado no comando a seguir."
           - |
@@ -224,7 +232,7 @@ data:
             kubectl get gateways nginx-gateway -o jsonpath='{.status.listeners[0].supportedKinds}' | jq
             ```
           - "Isso indica que o gateway suporta recursos do tipo HTTPRoute e GRPCRoute."
-          - "Você pode obter mais informações sobre estes recursos suportados com os comandos abaxo:"
+          - "Você pode obter mais informações sobre estes recursos suportados com os comandos abaixo:"
           - |
             ```
             kubectl explain httproute
@@ -241,9 +249,13 @@ data:
             kubectl explain grpcroute.spec.rules.matches
             kubectl explain grpcroute.spec.rules.filters
             ```
-          - "Nas próximas seções, você aprenderá a configurar rotas para esses e outros dos recursos do Gateway API."
+          - "Nas próximas seções, você aprenderá a configurar rotas para esses e outros recursos da Gateway API."
           - "Parabéns! Você criou com sucesso um Gateway usando o Nginx Gateway Fabric."
 
+        validation:
+          - command: "kubectl get gateway nginx-gateway -o jsonpath='{.status.conditions[?(@.type==\"Programmed\")].status}'"
+            expectedOutput: "True"
+            errorMessage: "O Gateway 'nginx-gateway' não está com o status Programmed=True. Verifique o arquivo gateway.yaml e o comando 'kubectl describe gateway nginx-gateway'."
       - name: "Configurando um HTTPRoute"
         description: "Agora que o Nginx Gateway está criado, vamos configurar um HTTPRoute simples para duas aplicações."
         steps:
@@ -335,7 +347,7 @@ data:
           - "Agora, crie um arquivo YAML chamado 'httproute.yaml' com o seguinte conteúdo para definir as rotas HTTP."
           - |
             ```
-            apiVersion: gateway.networking.k8s.io/v1beta1
+            apiVersion: gateway.networking.k8s.io/v1
             kind: HTTPRoute
             metadata:
               name: app1-app2-route
@@ -408,8 +420,12 @@ data:
             ```
           - "Parabéns! Você configurou com sucesso a Gateway API com o Nginx Gateway Fabric e criou rotas HTTP para duas aplicações diferentes."
 
+        validation:
+          - command: "kubectl get httproute app1-app2-route -o jsonpath='{.status.parents[0].conditions[?(@.type==\"Accepted\")].status}'"
+            expectedOutput: "True"
+            errorMessage: "O HTTPRoute 'app1-app2-route' não foi aceito pelo Gateway. Verifique o arquivo httproute.yaml."
       - name: "Entendendo o HTTPRoute"
-        description: "HTTPRoute é um recurso da Gateway API para rotear tráfego HTTP/HTTPS"
+        description: "HTTPRoute é um recurso da Gateway API para rotear tráfego HTTP/HTTPS."
         steps:
           - "HTTPRoute é um CRD (Custom Resource Definition) que define como rotear o tráfego HTTP/HTTPS para serviços de backend."
           - "HTTPRoute permite roteamento baseado em:"
@@ -418,9 +434,9 @@ data:
           - "- Headers: X-Custom-Header, Authorization, etc"
           - "- Query parameters: ?versao=v2"
           - "- Métodos HTTP: GET, POST, PUT, DELETE, etc"
-          - "Documentação oficial: https://gateway-api.sigs.k8s.io/api-types/httproute/"
+          - "Documentação oficial: https://gateway-api.sigs.k8s.io/reference/api-types/httproute/"
           - "No exercício anterior você criou um HTTPRoute simples que roteia o tráfego baseado em path (/app1 e /app2)."
-          - "Agora, vamos explorar mais exemplos avançados de HTTPRoute."
+          - "Agora, vamos explorar exemplos mais avançados de HTTPRoute."
           - "Crie um arquivo YAML chamado 'httproute-header.yaml'."
           - |
             ```
@@ -449,8 +465,8 @@ data:
             ```
           - "Explicação:"
           - "- Essa HTTPRoute roteia baseado no valor do header 'X-API-Version'"
-          - "- Se na requisição for passado o header 'X-API-Version=v1', ela será encaminhada pelo gateway para o serviço 'app1-service'"
-          - "- Se for passado o header 'X-API-Version=v2', vai ser encaminhada para o serviço 'app2-service'"
+          - "- Se a requisição tiver o header 'X-API-Version: v1', ela será encaminhada pelo gateway para o serviço 'app1-service'"
+          - "- Se tiver o header 'X-API-Version: v2', ela será encaminhada para o serviço 'app2-service'"
           - "- O path não é considerado nesse exemplo, apenas o header. Logo, todas as requisições serão feitas no path '/', que é o padrão."
           - "Aplique a configuração:"
           - |
@@ -542,7 +558,7 @@ data:
             ```
             curl -H "Host: weighted-api.local" http://$GATEWAY_IP:80/api
             ```
-          - "Você deve ver principalmente respostas da v1 com ocasionalmente respostas da v2"
+          - "Você deve ver principalmente respostas do 'app1' e, ocasionalmente, do 'app2'."
           - "Verifique os logs do gateway e das aplicações:"
           - |
             ```
@@ -566,12 +582,19 @@ data:
           - "- QueryParams: Parâmetros de query (?key=value)"
           - "- Method: Método HTTP (GET, POST, etc)"
           - "Documentação: https://kubernetes.io/docs/concepts/services-networking/gateway/"
-          - "Referência completa da API: https://gateway-api.sigs.k8s.io/references/spec/"
+          - "Referência completa da API: https://gateway-api.sigs.k8s.io/reference/api-spec/"
           - "Mais exemplos disponíveis em:"
           - "- https://docs.nginx.com/nginx-gateway-fabric/traffic-management/"
           - "- https://github.com/nginx/nginx-gateway-fabric/tree/main/examples"
           - "Você completou este laboratório com sucesso!"
 
+        validation:
+          - command: "kubectl get httproute api-route-header -o jsonpath='{.status.parents[0].conditions[?(@.type==\"Accepted\")].status}'"
+            expectedOutput: "True"
+            errorMessage: "O HTTPRoute 'api-route-header' não foi aceito pelo Gateway. Verifique o arquivo httproute-header.yaml."
+          - command: "kubectl get httproute api-route-weighted -o jsonpath='{.status.parents[0].conditions[?(@.type==\"Accepted\")].status}'"
+            expectedOutput: "True"
+            errorMessage: "O HTTPRoute 'api-route-weighted' não foi aceito pelo Gateway. Verifique o arquivo httproute-weighted.yaml."
       - name: "Entender o HTTPRoute for Mesh"
         description: "HTTPRoute com roteamento avançado para microsserviços"
         steps:
@@ -590,7 +613,7 @@ data:
           - "- A/B testing"
           - "- Traffic management"
           - "- API gateways"
-          - "Documentação: https://gateway-api.sigs.k8s.io/guides/traffic-splitting/"
+          - "Documentação: https://gateway-api.sigs.k8s.io/guides/user-guides/traffic-splitting/"
           - "Para simular uma malha de microsserviços, criaremos vários serviços com diferentes versões."
           - "Crie um arquivo chamado 'mesh-services-deploy.yaml'."
           - |
@@ -966,7 +989,7 @@ data:
           - "- Se X-Client-Type=internal -> nova versão (v2)"
           - "- Se X-Beta-Tester=true -> nova versão (v2)"
           - "- Default -> versão estável (v1)"
-          - "- Permite testers específicos usar versão beta"
+          - "- Permite que testadores específicos usem a versão beta"
           - "- Útil para A/B testing e feature flags"
           - "Aplique a configuração:"
           - |
@@ -1023,7 +1046,7 @@ data:
           - "- GET (leitura) -> v1 (estável)"
           - "- POST (criação) -> v2 (novo)"
           - "- PUT (atualização) -> v2 (novo)"
-          - "- DELETE (deleção) -> v1 (seguro)"
+          - "- DELETE (exclusão) -> v1 (seguro)"
           - "- Permite testar operações específicas"
           - "Aplique a configuração:"
           - |
@@ -1063,7 +1086,7 @@ data:
             curl -s -H "Host: api-canary.example.com" http://$GATEWAY_IP:80/users | grep -o "v[12]"; \
             done | sort | uniq -c
             ```
-          - "Deve mostrar aproximadamente ~18 v1 e ~2 v2 (90% vs 10%)"
+          - "Deve mostrar cerca de 18 respostas da v1 e 2 da v2 (90% e 10%)"
           - "Teste roteamento por header:"
           - |
             ```
@@ -1097,3 +1120,7 @@ data:
             kubectl logs -l app=api-users --tail=20
             ```
           - "Você completou o laboratório HTTPRoute for Mesh com sucesso!"
+        validation:
+          - command: "kubectl get httproute mesh-route-by-path -o jsonpath='{.status.parents[0].conditions[?(@.type==\"Accepted\")].status}'"
+            expectedOutput: "True"
+            errorMessage: "O HTTPRoute 'mesh-route-by-path' não foi aceito pelo Gateway. Verifique o arquivo httproute-mesh-path.yaml."
